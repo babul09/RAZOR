@@ -120,8 +120,8 @@
 
 ### Phase 8 · Demo Hardening & Integration Tests
 **Objective**: End-to-end integration + demo script validation
-- [ ] End-to-end test: ingest 10,000 events → simulation → dashboard shows results
-- [ ] Demo script: validate all 10 steps of the "killer demo flow"
+- [x] End-to-end test: ingest 10,000 events → simulation → dashboard shows results
+- [x] Demo script: validate all 10 steps of the "killer demo flow"
   - Step 1: Generate 10,000 events
   - Step 2: System shows ₹48.2L at risk
   - Step 3: Agent diagnoses failure categories
@@ -132,8 +132,8 @@
   - Step 8: Customer drill-down with decision timeline
   - Step 9: Policy engine blocking demo
   - Step 10: Learning loop demonstration
-- [ ] Error handling: all API routes return structured errors
-- [ ] Loading states, empty states in UI
+- [x] Error handling: all API routes return structured errors
+- [x] Loading states, empty states in UI
 
 ---
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from api.errors import http_error
 from api.schemas import (
     ExperimentArmMetric,
     ExperimentCreateRequest,
@@ -53,7 +54,7 @@ def create_experiment(
             body.merchant_id,
         )
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise http_error(400, "invalid_experiment", str(exc)) from exc
     arms = [
         ExperimentArmMetric(
             experiment_id=experiment.id,

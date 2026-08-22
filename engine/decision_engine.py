@@ -210,7 +210,7 @@ class DecisionEngine:
             evaluated=evaluated,
         )
 
-        self._persist(case, decision, features, evaluated)
+        self._persist(case.id, decision, features, evaluated)
         return decision
 
     # ------------------------------------------------------------------
@@ -248,14 +248,14 @@ class DecisionEngine:
 
     def _persist(
         self,
-        case: RecoveryCase,
+        case_id: str,
         decision: Decision,
         features: Mapping[str, Any],
         evaluated: list[EvaluatedStrategy],
     ) -> None:
         evaluated_json = {r.strategy: r.expected_net_paise for r in evaluated}
         with self.session_factory() as session:
-            persistent = session.merge(case)
+            persistent = session.get(RecoveryCase, case_id)
             persistent.status = self._advance_status(persistent.status, decision)
             session.add(
                 AgentDecision(

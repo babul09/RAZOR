@@ -1,21 +1,21 @@
 # RAZOR — Project State
 
 ## Current Status
-- **Milestone**: M3 — Dashboard & Experiment Engine
-- **Active Phase**: Phase 7 · Next.js Dashboard
-- **Workflow State**: EXECUTION_COMPLETE — Phase 7 implementation complete; dashboard builds + renders all 5 sections, SSE + drill-down verified in browser
+- **Milestone**: M4 — Polish, Demo & Submission
+- **Active Phase**: Phase 8 · Demo Hardening & Integration Tests
+- **Workflow State**: EXECUTION_COMPLETE — Phase 8 implementation complete; full test suite (69) passes; E2E integration + 10-step demo flow verified; web builds
 
 ## Last Action
-- Phase 7 implementation completed: Next.js dashboard under web/ (Overview Recharts, Live Queue SSE, Agent Activity, Strategy Performance, Simulation, case drill-down), backend SSE endpoint + CORS; build OK, browser-verified
+- Phase 8 implementation completed: standardized API errors, E2E integration test, 10-step demo-flow pytest, dashboard loading/empty states
 - Date: 2026-08-22
 
-## Phase 7 Locked Decisions
+## Phase 8 Locked Decisions
 | Decision | Choice |
 |----------|--------|
-| Location | `web/` subfolder (App Router, TS, Tailwind, Recharts) |
-| Data source | Live FastAPI backend + mock fallback |
-| Real-time | SSE (GET /api/recovery/events added) |
-| Deploy | Build now, document Vercel steps (web/README.md) |
+| Demo validation | pytest-based (10-step demo flow) |
+| Integration test | Live DB + Redis (eager simulation) |
+| Error handling | Standardize error shape across API |
+| UI states | Add loading + empty states to all sections |
 
 
 ## Phase 3 Locked Decisions
@@ -45,8 +45,8 @@
 - Every agent decision logged to audit_logs
 
 ## Next Steps
-1. Run `/gsd-plan-phase 8` for Demo Hardening & Integration Tests (M4 begins)
-2. Phase 7 note: run backend `uvicorn api.main:app` + dashboard `cd web && npm run dev`; deploy steps in web/README.md
+1. Run `/gsd-plan-phase 9` for Polish & Submission (final M4 phase)
+2. Phase 8 note: `python -m pytest tests/test_demo_flow.py` validates the full demo flow
 
 ## Simulation Target Numbers
 | Metric | Baseline | RAZOR |

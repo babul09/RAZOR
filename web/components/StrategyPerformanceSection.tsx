@@ -3,13 +3,17 @@
 import { useEffect, useState } from "react";
 
 import { formatInr, getStrategies, type StrategyMetric } from "@/lib/api";
+import { Empty, Loading } from "./State";
 
 export default function StrategyPerformanceSection() {
-  const [rows, setRows] = useState<StrategyMetric[]>([]);
+  const [rows, setRows] = useState<StrategyMetric[] | null>(null);
 
   useEffect(() => {
     getStrategies().then(setRows);
   }, []);
+
+  if (!rows) return <Loading label="Loading strategies…" />;
+  if (rows.length === 0) return <Empty label="No strategy data yet." />;
 
   return (
     <section>

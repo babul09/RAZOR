@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { formatInr, getOverview, type Overview } from "@/lib/api";
+import { Empty, Loading } from "./State";
 
 export default function OverviewSection() {
   const [data, setData] = useState<Overview | null>(null);
@@ -20,7 +21,8 @@ export default function OverviewSection() {
     getOverview().then(setData);
   }, []);
 
-  if (!data) return <p className="text-sm text-slate-500">Loading overview…</p>;
+  if (!data) return <Loading label="Loading overview…" />;
+  if (data.total_cases === 0) return <Empty label="No data yet — run a simulation or ingest events." />;
 
   const chartData = [
     { name: "Revenue at risk", paise: data.revenue_at_risk_paise },

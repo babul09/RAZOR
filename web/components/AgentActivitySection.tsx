@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { getCaseDetail, type CaseDetail } from "@/lib/api";
+import { Empty, Loading } from "./State";
 
 export default function AgentActivitySection({ caseId }: { caseId: string }) {
   const [detail, setDetail] = useState<CaseDetail | null>(null);
@@ -11,7 +12,8 @@ export default function AgentActivitySection({ caseId }: { caseId: string }) {
     getCaseDetail(caseId).then(setDetail);
   }, [caseId]);
 
-  if (!detail) return <p className="text-sm text-slate-500">Loading timeline…</p>;
+  if (!detail) return <Loading label="Loading timeline…" />;
+  if (detail.timeline.length === 0) return <Empty label="No timeline entries for this case." />;
 
   return (
     <section className="space-y-2">

@@ -4,6 +4,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.errors import register_exception_handlers
 from api.routers import analytics, events, experiments, health, recovery, simulation
 
 app = FastAPI(title="RAZOR API", version="0.1.0")
@@ -15,6 +16,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+register_exception_handlers(app)
 
 app.include_router(health.router)
 app.include_router(recovery.router)

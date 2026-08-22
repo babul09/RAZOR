@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { API_URL, formatInr, getCases, type CaseSummary } from "@/lib/api";
+import { Empty, Loading } from "./State";
 
 const statusStyles: Record<string, string> = {
   NEW: "bg-slate-100 text-slate-700",
@@ -19,7 +20,7 @@ export default function RecoveryQueueSection({
 }: {
   onSelect: (caseId: string) => void;
 }) {
-  const [cases, setCases] = useState<CaseSummary[]>([]);
+  const [cases, setCases] = useState<CaseSummary[] | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -58,6 +59,9 @@ export default function RecoveryQueueSection({
   return (
     <section>
       <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        {cases === null ? (
+          <Loading label="Loading recovery queue…" />
+        ) : (
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs text-slate-500">
             <tr>
@@ -103,6 +107,7 @@ export default function RecoveryQueueSection({
             )}
           </tbody>
         </table>
+        )}
       </div>
     </section>
   );

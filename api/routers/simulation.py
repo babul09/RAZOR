@@ -1,10 +1,11 @@
 """Celery async simulation endpoints (FR-13): dispatch + status polling."""
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from agents.celery_app import celery_app
 from agents.tasks import run_simulation as run_simulation_task
+from api.errors import http_error
 from api.schemas import (
     SimulationRunRequest,
     SimulationRunResponse,
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/api/simulation", tags=["simulation"])
 @router.post("/run", response_model=SimulationRunResponse)
 def run_simulation(body: SimulationRunRequest) -> SimulationRunResponse:
     if body.n_events < 1:
-        raise HTTPException(status_code=400, detail="n_events must be positive")
+        raise http_error(400, "invalid_n_events", "n_events must be positive")
     async_result = run_simulation_task.delay(body.n_events, body.seed, body.hour)
     return SimulationRunResponse(job_id=async_result.id)
 

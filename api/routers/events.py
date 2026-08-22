@@ -1,9 +1,10 @@
 """Idempotent event ingestion webhook (FR-01) + revenue risk scoring (FR-02)."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from api.errors import http_error
 from api.schemas import EventIngestRequest, EventIngestResponse
 from db.database import get_db
 from db.models import (
@@ -37,7 +38,7 @@ DEFAULT_RECOVERY_PROBABILITY = 0.4
 @router.post("/ingest", response_model=EventIngestResponse)
 def ingest(payload: EventIngestRequest, db: Session = Depends(get_db)) -> EventIngestResponse:
     if payload.event_type not in SUPPORTED_EVENT_TYPES:
-        raise HTTPException(status_code=400, detail=f"unsupported event_type: {payload.event_type}")
+        raise http_error(400, "unsupported_event_type", f"unsupported event_type: {payload.event_type}")
 
     # Idempotency: a Payment keyed by event_id means this event was handled.
     if db.get(Payment, payload.event_id) is not None:
