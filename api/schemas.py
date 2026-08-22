@@ -83,6 +83,26 @@ class ExperimentArmMetric(BaseModel):
     attempts: int = 0
     recoveries: int = 0
     revenue_recovered_paise: int = 0
+    recovery_rate: float | None = None
+
+
+class ExperimentArmCreate(BaseModel):
+    arm_name: str
+    traffic_percent: int
+    strategy: str | None = None
+
+
+class ExperimentCreateRequest(BaseModel):
+    name: str
+    merchant_id: str
+    arms: list[ExperimentArmCreate]
+
+
+class ExperimentCreateResponse(BaseModel):
+    id: str
+    name: str
+    status: str
+    arms: list[ExperimentArmMetric]
 
 
 class EventIngestRequest(BaseModel):

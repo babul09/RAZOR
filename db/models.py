@@ -206,6 +206,20 @@ class RecoveryOutcome(Base):
     action = relationship("RecoveryAction", back_populates="outcomes")
 
 
+class RecoveryMemory(Base):
+    """FR-11 learning loop: (customer, failure_type, strategy, outcome) after a case."""
+
+    __tablename__ = "recovery_memory"
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    customer_id = Column(String(36), ForeignKey("customers.id"), nullable=False)
+    failure_type = Column(String(100), nullable=True)  # failure_code
+    strategy = Column(String(50), nullable=False)
+    outcome = Column(String(50), nullable=False)  # RECOVERED / FAILED
+    recovered = Column(Boolean, nullable=False, default=False)
+    amount_paise = Column(BigInteger, default=0)  # PAISE
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class Experiment(Base):
     __tablename__ = "experiments"
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

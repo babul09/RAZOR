@@ -88,12 +88,12 @@
 
 ### Phase 6 · Recovery Memory + Experiment Engine
 **Objective**: Learning loop + A/B experiments
-- [ ] Recovery memory: `(customer, failure_type, strategy, outcome)` stored after each case
-- [ ] Customer profile update: per-channel success rates recomputed after each case
-- [ ] Experiment engine: traffic allocation (control / retry / whatsapp / UPI switch)
-- [ ] Per-arm metrics: recovery rate, revenue, cost, net revenue
-- [ ] Strategy weight update from experiment results
-- [ ] Display experiments in API response
+- [x] Recovery memory: `(customer, failure_type, strategy, outcome)` stored after each case
+- [x] Customer profile update: per-channel success rates recomputed after each case
+- [x] Experiment engine: traffic allocation (control / retry / whatsapp / UPI switch)
+- [x] Per-arm metrics: recovery rate, revenue, cost, net revenue
+- [x] Strategy weight update from experiment results
+- [x] Display experiments in API response
 
 **Deliverable**: `engine/experiment_engine.py`, customer profile auto-updates
 

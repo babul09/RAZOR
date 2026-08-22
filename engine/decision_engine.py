@@ -60,11 +60,21 @@ class DecisionEngine:
         state_machine: RecoveryStateMachine | None = None,
         wait_window: tuple[int | None, int | None] = (19, 22),
         session_factory: Callable = SessionLocal,
+        strategy_weights: dict[str, float] | None = None,
     ):
         self.model = model
         self.state_machine = state_machine or RecoveryStateMachine()
         self.wait_window = wait_window
         self.session_factory = session_factory
+        # FR-12: experiment-derived weights scale EV; default neutral 1.0.
+        self.strategy_weights = dict(strategy_weights or {})
+
+    def set_strategy_weights(self, weights: dict[str, float]) -> None:
+        """Update per-strategy EV weights (experiment feedback)."""
+        self.strategy_weights = {k: float(v) for k, v in weights.items()}
+
+    def _weight(self, strategy: str) -> float:
+        return self.strategy_weights.get(strategy, 1.0)
 
     # ------------------------------------------------------------------
     # Expected net recovery
@@ -93,8 +103,12 @@ class DecisionEngine:
         amount_paise: int,
         discount_rate: float = 0.0,
     ) -> int:
-        """``expected_net = P(recovery) * amount - cost`` in integer paise."""
-        probability = self._probability(features, strategy)
+        """``expected_net = P(recovery) * amount - cost`` in integer paise.
+
+        Probability is scaled by the strategy weight (clamped to [0,1]).
+        """
+        probability = self._probability(features, strategy) * self._weight(strategy)
+        probability = max(0.0, min(1.0, probability))
         cost = self._cost(strategy, amount_paise, discount_rate)
         return int(probability * amount_paise) - cost
 
@@ -113,7 +127,8 @@ class DecisionEngine:
         """Score all candidate strategies; ``current_hour`` reserved for timing."""
         results: list[EvaluatedStrategy] = []
         for strategy in self._candidates(discount_rate):
-            probability = self._probability(features, strategy)
+            probability = self._probability(features, strategy) * self._weight(strategy)
+            probability = max(0.0, min(1.0, probability))
             cost = self._cost(strategy, amount_paise, discount_rate)
             net = int(probability * amount_paise) - cost
             results.append(EvaluatedStrategy(strategy, probability, cost, net))

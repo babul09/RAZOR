@@ -92,6 +92,25 @@ class SimpleDiagnosis:
         self.diagnosis = diagnosis
 
 
+@celery_app.task(name="update_profile")
+def update_profile(customer_id: str) -> dict:
+    """Asynchronously recompute a customer's recovery profile from memory (FR-11)."""
+    from engine.recovery_memory import update_profile as _update_profile
+
+    session = SessionLocal()
+    try:
+        profile = _update_profile(session, customer_id)
+        if profile is None:
+            return {"ok": False, "error": "customer not found"}
+        return {
+            "ok": True,
+            "customer_id": customer_id,
+            "overall_recovery_probability": profile.overall_recovery_probability,
+        }
+    finally:
+        session.close()
+
+
 @celery_app.task(name="run_simulation")
 def run_simulation(n_events: int, seed: int = 42, hour: int = 14) -> dict:
     """Run the baseline + RAZOR simulators and return the comparison dict (FR-13)."""

@@ -1,21 +1,21 @@
 # RAZOR — Project State
 
 ## Current Status
-- **Milestone**: M2 — Agent Layer & Backend API
-- **Active Phase**: Phase 5 · FastAPI Backend
-- **Workflow State**: EXECUTION_COMPLETE — Phase 5 implementation complete; full test suite (53) passes; Celery async simulation verified on Redis broker
+- **Milestone**: M3 — Dashboard & Experiment Engine
+- **Active Phase**: Phase 6 · Recovery Memory + Experiment Engine
+- **Workflow State**: EXECUTION_COMPLETE — Phase 6 implementation complete; full test suite (65) passes; migration 002 applied; demo experiment seeded
 
 ## Last Action
-- Phase 5 implementation completed: FastAPI app (health, recovery queue/detail, analytics with Redis cache, events/ingest + risk engine, Celery async simulation, experiments); real-broker smoke passed
+- Phase 6 implementation completed: recovery_memory table + profile recompute (Celery), weighted DecisionEngine EV, experiment engine (create/allocate/metrics/weights) + experiments API + seed script
 - Date: 2026-08-22
 
-## Phase 5 Locked Decisions
+## Phase 6 Locked Decisions
 | Decision | Choice |
 |----------|--------|
-| Auth | None (open demo endpoints) |
-| Simulation run | Celery async job (job_id + status polling) |
-| Experiments endpoint | Reads DB (may be empty until Phase 6) |
-| Risk engine (FR-02) | Include risk scoring on payment.failed ingest |
+| Memory store | New `recovery_memory` table + alembic migration 002 (applied) |
+| Profile update | Celery `update_profile` task |
+| Strategy weights | EV multiplier in DecisionEngine (fed by experiments) |
+| Experiment setup | POST /api/experiments (runtime creation) |
 
 
 ## Phase 3 Locked Decisions
@@ -45,8 +45,8 @@
 - Every agent decision logged to audit_logs
 
 ## Next Steps
-1. Run `/gsd-plan-phase 6` for Recovery Memory + Experiment Engine (M3 begins)
-2. Phase 5 note: run `uvicorn api.main:app` to serve; `celery -A agents.celery_app worker` for async tasks
+1. Run `/gsd-plan-phase 7` for the Next.js Dashboard (M3 continues)
+2. Phase 6 note: `python scripts/seed_experiment.py` creates the demo experiment (idempotent)
 
 ## Simulation Target Numbers
 | Metric | Baseline | RAZOR |
