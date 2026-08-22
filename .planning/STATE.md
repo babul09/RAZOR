@@ -2,20 +2,20 @@
 
 ## Current Status
 - **Milestone**: M4 — Polish, Demo & Submission
-- **Active Phase**: Phase 8 · Demo Hardening & Integration Tests
-- **Workflow State**: EXECUTION_COMPLETE — Phase 8 implementation complete; full test suite (69) passes; E2E integration + 10-step demo flow verified; web builds
+- **Active Phase**: Phase 9 · Polish & Submission
+- **Workflow State**: EXECUTION_COMPLETE — Phase 9 implementation complete; full test suite (69) passes; dashboard polished with +₹7.22L headline; README + deploy/submission/walkthrough docs done
 
 ## Last Action
-- Phase 8 implementation completed: standardized API errors, E2E integration test, 10-step demo-flow pytest, dashboard loading/empty states
+- Phase 9 implementation completed: design-token UI polish + INR + headline, full README with Mermaid diagram, deploy guide, submission checklist, walkthrough script
 - Date: 2026-08-22
 
-## Phase 8 Locked Decisions
+## Phase 9 Locked Decisions
 | Decision | Choice |
 |----------|--------|
-| Demo validation | pytest-based (10-step demo flow) |
-| Integration test | Live DB + Redis (eager simulation) |
-| Error handling | Standardize error shape across API |
-| UI states | Add loading + empty states to all sections |
+| Deployment | Docs-only deploy guide (Vercel + Railway + managed Postgres) |
+| UI polish | Design-token pass + INR + prominent +₹7.22L headline |
+| README + diagram | Full root README + Mermaid architecture diagram |
+| Video | Document 2-3 min walkthrough script (manual) |
 
 
 ## Phase 3 Locked Decisions
@@ -45,8 +45,8 @@
 - Every agent decision logged to audit_logs
 
 ## Next Steps
-1. Run `/gsd-plan-phase 9` for Polish & Submission (final M4 phase)
-2. Phase 8 note: `python -m pytest tests/test_demo_flow.py` validates the full demo flow
+1. Manual items (docs ready): live Vercel/Railway deploy (`docs/DEPLOYMENT.md`), record demo video (`docs/WALKTHROUGH.md`), finalize submission (`docs/SUBMISSION.md`)
+2. **All roadmap phases 1-9 complete** — full suite 69 tests pass, dashboard polished, docs/submission package delivered
 
 ## Simulation Target Numbers
 | Metric | Baseline | RAZOR |

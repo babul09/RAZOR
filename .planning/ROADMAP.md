@@ -139,13 +139,13 @@
 
 ### Phase 9 · Polish & Submission
 **Objective**: Pitch-ready final state
-- [ ] UI visual polish (consistent INR formatting, color system, typography)
-- [ ] Dashboard headline: `+₹7.22L incremental revenue` prominently displayed
-- [ ] README.md: setup instructions, architecture diagram, demo steps
-- [ ] Architecture diagram in pitch-friendly format
-- [ ] Deployment: Vercel (frontend) + Railway (backend) + managed PostgreSQL
+- [x] UI visual polish (consistent INR formatting, color system, typography)
+- [x] Dashboard headline: `+₹7.22L incremental revenue` prominently displayed
+- [x] README.md: setup instructions, architecture diagram, demo steps
+- [x] Architecture diagram in pitch-friendly format
+- [x] Deployment: Vercel (frontend) + Railway (backend) + managed PostgreSQL
 - [ ] Record demo video (2-3 min walkthrough of all 10 demo steps)
-- [ ] Final submission package
+- [x] Final submission package
 
 ---
 

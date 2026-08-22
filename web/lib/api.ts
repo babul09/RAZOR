@@ -115,3 +115,16 @@ export function formatInr(paise: number): string {
   if (rupees >= 100000) return `₹${(rupees / 100000).toFixed(2)}L`;
   return `₹${Math.round(rupees).toLocaleString("en-IN")}`;
 }
+
+/** Format a signed paise value as +/− ₹ for headline/delta display. */
+export function formatInrSigned(paise: number): string {
+  const rupees = paise / 100;
+  const sign = rupees >= 0 ? "+" : "−";
+  let body: string;
+  if (Math.abs(rupees) >= 100000) {
+    body = `₹${(Math.abs(rupees) / 100000).toFixed(2)}L`;
+  } else {
+    body = `₹${Math.round(Math.abs(rupees)).toLocaleString("en-IN")}`;
+  }
+  return `${sign}${body}`;
+}

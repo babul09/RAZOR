@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { formatInr, getOverview, type Overview } from "@/lib/api";
+import { formatInr, formatInrSigned, getOverview, type Overview } from "@/lib/api";
 import { Empty, Loading } from "./State";
 
 export default function OverviewSection() {
@@ -31,6 +31,17 @@ export default function OverviewSection() {
 
   return (
     <section className="space-y-4">
+      {/* Pitch headline (ROADMAP Phase 9) — target from demo comparison. */}
+      <div className="rounded-card bg-success-light p-6 shadow-card">
+        <p className="text-headline text-success">
+          {formatInrSigned(72_200_000)}{" "}
+          <span className="text-2xl font-semibold text-ink">incremental revenue</span>
+        </p>
+        <p className="mt-1 text-sm text-ink-muted">
+          recovered vs baseline — RAZOR recovery engine
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat label="₹ at risk" value={formatInr(data.revenue_at_risk_paise)} />
         <Stat label="₹ recovered" value={formatInr(data.recovered_paise)} />
