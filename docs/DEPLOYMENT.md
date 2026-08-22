@@ -57,9 +57,15 @@ python scripts/demo_data.py --events 800 --reset
 
 ## 3. Backend API (Railway)
 
-1. Create a **Railway** project from the repo.
-2. **Start command:** `uvicorn api.main:app --host 0.0.0.0 --port $PORT`
-3. **Environment variables:**
+1. Create a **Railway** project from the repo. Keep the service root at the repository root.
+2. The committed `railway.toml` configures the API start command automatically:
+   `uvicorn api.main:app --host 0.0.0.0 --port $PORT`
+3. If configuring Railway in the UI, put that value in **Deploy → Start Command**.
+   Leave **Build Command empty**; `uvicorn` is not a build command. The error
+   `No start command detected` commonly means the command was entered in the
+   wrong field.
+4. **Healthcheck path:** `/health` (not `/api/health`).
+5. **Environment variables:**
 
    | Var | Value |
    |-----|-------|
@@ -77,12 +83,15 @@ python scripts/demo_data.py --events 800 --reset
 Celery runs the **async Gemini diagnosis/explanation** tasks. It must share the same
 `DATABASE_URL` and `REDIS_URL`.
 
-1. Add a second Railway service for the repo.
-2. **Start command:**
+1. Add a second Railway service for the repo. Set the same repository root and
+   the same environment variables as the API.
+2. Override **Deploy → Start Command** with:
    ```bash
    celery -A agents.celery_app worker --loglevel=info --concurrency=2
    ```
-3. Same env vars as the API (`DATABASE_URL`, `REDIS_URL`, `GEMINI_API_KEY`).
+3. Do not use the API `railway.toml` start command for this service; the worker
+   must run the Celery command above. Same env vars as the API
+   (`DATABASE_URL`, `REDIS_URL`, `GEMINI_API_KEY`).
 
 > **How Celery is triggered:** when the API ingests a `payment.failed` event, it calls
 > `dispatch_diagnosis(case_id)` which enqueues `diagnose_case` on the broker. The worker
