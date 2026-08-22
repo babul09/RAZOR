@@ -21,7 +21,6 @@ export default function SimulationSection() {
     setStatus(null);
     try {
       const { job_id } = await runSimulation(n);
-      // Poll until SUCCESS/FAILURE.
       for (let i = 0; i < 40; i++) {
         await new Promise((r) => setTimeout(r, 1000));
         const s = await getSimulationStatus(job_id);
@@ -43,8 +42,12 @@ export default function SimulationSection() {
 
   return (
     <section className="space-y-4">
-      <div className="flex items-end gap-3 rounded-lg border border-slate-200 bg-white p-4">
-        <label className="text-sm">
+      <p className="font-mono text-eyebrow uppercase text-fg-muted">
+        Simulation
+      </p>
+
+      <div className="flex flex-wrap items-end gap-3 rounded-card border border-line bg-ink-900 p-4 shadow-card">
+        <label className="font-mono text-xs text-fg-muted">
           Events
           <input
             type="number"
@@ -52,41 +55,49 @@ export default function SimulationSection() {
             min={100}
             step={100}
             onChange={(e) => setN(Number(e.target.value))}
-            className="ml-2 rounded border border-slate-300 px-2 py-1"
+            className="ml-2 rounded border border-line bg-ink-800 px-2 py-1 font-mono text-fg focus:border-gold"
           />
         </label>
         <button
           onClick={handleRun}
           disabled={running}
-          className="rounded bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50"
+          className="rounded-card bg-gold px-4 py-2 font-display text-sm font-semibold text-ink-950 transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {running ? "Running…" : "Run Recovery Simulation"}
+          {running ? "Running…" : "Run recovery simulation"}
         </button>
       </div>
 
-      {error && <p className="text-sm text-rose-600">{error}</p>}
-      {status?.status === "PENDING" && <p className="text-sm text-slate-500">Simulation in progress…</p>}
+      {error && <p className="font-mono text-sm text-rose">{error}</p>}
+      {status?.status === "PENDING" && (
+        <p className="animate-pulse-soft font-mono text-sm text-fg-muted">
+          Simulation in progress…
+        </p>
+      )}
 
       {result && (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-card border border-line bg-ink-900 shadow-card">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs text-slate-500">
+            <thead className="border-b border-line bg-ink-800/60 font-mono text-[11px] uppercase tracking-wider text-fg-muted">
               <tr>
-                <th className="px-4 py-2">Metric</th>
-                <th className="px-4 py-2">Baseline</th>
-                <th className="px-4 py-2">RAZOR</th>
+                <th className="px-4 py-3 font-medium">Metric</th>
+                <th className="px-4 py-3 text-right font-medium">Baseline</th>
+                <th className="px-4 py-3 text-right font-medium">RAZOR</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-slate-100">
-                <td className="px-4 py-2 font-medium">Revenue recovered</td>
-                <td className="px-4 py-2">{formatInr(result.baseline?.total_recovered_paise ?? 0)}</td>
-                <td className="px-4 py-2">{formatInr(result.razor?.total_recovered_paise ?? 0)}</td>
+              <tr className="border-b border-line/60">
+                <td className="px-4 py-2.5 text-fg">Revenue recovered</td>
+                <td className="money px-4 py-2.5 text-right text-fg-muted">
+                  {formatInr(result.baseline?.total_recovered_paise ?? 0)}
+                </td>
+                <td className="money px-4 py-2.5 text-right text-gold">
+                  {formatInr(result.razor?.total_recovered_paise ?? 0)}
+                </td>
               </tr>
               <tr>
-                <td className="px-4 py-2 font-medium">Incremental revenue</td>
-                <td className="px-4 py-2">—</td>
-                <td className="px-4 py-2 text-emerald-600">
+                <td className="px-4 py-2.5 font-display text-fg">Incremental revenue</td>
+                <td className="px-4 py-2.5 text-right text-fg-muted">—</td>
+                <td className="money px-4 py-2.5 text-right text-mint">
                   +{formatInr(result.incremental_paise ?? 0)}
                 </td>
               </tr>

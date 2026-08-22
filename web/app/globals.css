@@ -2,13 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-slate-100 text-ink antialiased;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+:root {
+  color-scheme: dark;
 }
 
-@layer utilities {
-  .amount {
-    font-variant-numeric: tabular-nums;
+html,
+body {
+  background: #070b14;
+  color: #e8edf6;
+}
+
+body {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Money figures are data — tabular, mono, terminal feel. */
+.money {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+*:focus-visible {
+  outline: 2px solid #e8b84b;
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgb(232 184 75 / 0.25);
+}
+
+/* Subtle scrollbar for the ops console. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1e2a47 transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
   }
 }

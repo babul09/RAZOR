@@ -6,13 +6,13 @@ import { API_URL, formatInr, getCases, type CaseSummary } from "@/lib/api";
 import { Empty, Loading } from "./State";
 
 const statusStyles: Record<string, string> = {
-  NEW: "bg-slate-100 text-slate-700",
-  STRATEGY_SELECTED: "bg-indigo-100 text-indigo-700",
-  WAIT: "bg-amber-100 text-amber-700",
-  STOPPED: "bg-slate-200 text-slate-500",
-  AWAITING_APPROVAL: "bg-orange-100 text-orange-700",
-  RECOVERED: "bg-emerald-100 text-emerald-700",
-  FAILED: "bg-rose-100 text-rose-700",
+  NEW: "bg-ink-700 text-fg-muted",
+  STRATEGY_SELECTED: "bg-gold/15 text-gold",
+  WAIT: "bg-amber-500/15 text-amber-300",
+  STOPPED: "bg-ink-700 text-fg-muted",
+  AWAITING_APPROVAL: "bg-orange-500/15 text-orange-300",
+  RECOVERED: "bg-mint/15 text-mint",
+  FAILED: "bg-rose/15 text-rose",
 };
 
 export default function RecoveryQueueSection({
@@ -57,56 +57,63 @@ export default function RecoveryQueueSection({
   }, []);
 
   return (
-    <section>
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+    <section className="space-y-3">
+      <p className="font-mono text-eyebrow uppercase text-fg-muted">
+        Live recovery queue · SSE
+      </p>
+      <div className="overflow-x-auto rounded-card border border-line bg-ink-900 shadow-card">
         {cases === null ? (
-          <Loading label="Loading recovery queue…" />
+          <Loading label="Loading recovery queue" />
         ) : (
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-xs text-slate-500">
-            <tr>
-              <th className="px-4 py-2">Customer</th>
-              <th className="px-4 py-2">Amount</th>
-              <th className="px-4 py-2">Issue</th>
-              <th className="px-4 py-2">Probability</th>
-              <th className="px-4 py-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cases.map((c) => (
-              <tr
-                key={c.id}
-                className="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
-                onClick={() => onSelect(c.id)}
-              >
-                <td className="px-4 py-2 font-medium">{c.customer_id.slice(0, 8)}</td>
-                <td className="px-4 py-2">{formatInr(c.amount_at_risk_paise)}</td>
-                <td className="px-4 py-2">{c.failure_code || "—"}</td>
-                <td className="px-4 py-2">
-                  {c.recovery_probability != null
-                    ? `${(c.recovery_probability * 100).toFixed(0)}%`
-                    : "—"}
-                </td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      statusStyles[c.status] || "bg-slate-100 text-slate-700"
-                    }`}
-                  >
-                    {c.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-            {cases.length === 0 && (
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-line bg-ink-800/60 font-mono text-[11px] uppercase tracking-wider text-fg-muted">
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
-                  No recovery cases
-                </td>
+                <th className="px-4 py-3 font-medium">Customer</th>
+                <th className="px-4 py-3 text-right font-medium">Amount</th>
+                <th className="px-4 py-3 font-medium">Issue</th>
+                <th className="px-4 py-3 text-right font-medium">P(rec)</th>
+                <th className="px-4 py-3 font-medium">Status</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {cases.map((c) => (
+                <tr
+                  key={c.id}
+                  className="cursor-pointer border-b border-line/60 transition-colors hover:bg-ink-800/40"
+                  onClick={() => onSelect(c.id)}
+                >
+                  <td className="px-4 py-2.5 font-mono text-fg">
+                    {c.customer_id.slice(0, 8)}
+                  </td>
+                  <td className="money px-4 py-2.5 text-right text-gold">
+                    {formatInr(c.amount_at_risk_paise)}
+                  </td>
+                  <td className="px-4 py-2.5 text-fg-muted">{c.failure_code || "—"}</td>
+                  <td className="money px-4 py-2.5 text-right text-fg">
+                    {c.recovery_probability != null
+                      ? `${(c.recovery_probability * 100).toFixed(0)}%`
+                      : "—"}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span
+                      className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${
+                        statusStyles[c.status] || "bg-ink-700 text-fg-muted"
+                      }`}
+                    >
+                      {c.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {cases.length === 0 && (
+                <tr>
+                  <td colSpan={5}>
+                    <Empty label="No recovery cases" />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         )}
       </div>
     </section>
