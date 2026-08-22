@@ -21,6 +21,13 @@ simulation/data/
 ml/models/*.joblib
 ml/models/*.pkl
 
+# Node / Next.js dashboard
+node_modules/
+web/node_modules/
+web/.next/
+web/out/
+npm-debug.log*
+
 # IDE
 .idea/
 .vscode/

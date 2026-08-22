@@ -2,20 +2,20 @@
 
 ## Current Status
 - **Milestone**: M3 — Dashboard & Experiment Engine
-- **Active Phase**: Phase 6 · Recovery Memory + Experiment Engine
-- **Workflow State**: EXECUTION_COMPLETE — Phase 6 implementation complete; full test suite (65) passes; migration 002 applied; demo experiment seeded
+- **Active Phase**: Phase 7 · Next.js Dashboard
+- **Workflow State**: EXECUTION_COMPLETE — Phase 7 implementation complete; dashboard builds + renders all 5 sections, SSE + drill-down verified in browser
 
 ## Last Action
-- Phase 6 implementation completed: recovery_memory table + profile recompute (Celery), weighted DecisionEngine EV, experiment engine (create/allocate/metrics/weights) + experiments API + seed script
+- Phase 7 implementation completed: Next.js dashboard under web/ (Overview Recharts, Live Queue SSE, Agent Activity, Strategy Performance, Simulation, case drill-down), backend SSE endpoint + CORS; build OK, browser-verified
 - Date: 2026-08-22
 
-## Phase 6 Locked Decisions
+## Phase 7 Locked Decisions
 | Decision | Choice |
 |----------|--------|
-| Memory store | New `recovery_memory` table + alembic migration 002 (applied) |
-| Profile update | Celery `update_profile` task |
-| Strategy weights | EV multiplier in DecisionEngine (fed by experiments) |
-| Experiment setup | POST /api/experiments (runtime creation) |
+| Location | `web/` subfolder (App Router, TS, Tailwind, Recharts) |
+| Data source | Live FastAPI backend + mock fallback |
+| Real-time | SSE (GET /api/recovery/events added) |
+| Deploy | Build now, document Vercel steps (web/README.md) |
 
 
 ## Phase 3 Locked Decisions
@@ -45,8 +45,8 @@
 - Every agent decision logged to audit_logs
 
 ## Next Steps
-1. Run `/gsd-plan-phase 7` for the Next.js Dashboard (M3 continues)
-2. Phase 6 note: `python scripts/seed_experiment.py` creates the demo experiment (idempotent)
+1. Run `/gsd-plan-phase 8` for Demo Hardening & Integration Tests (M4 begins)
+2. Phase 7 note: run backend `uvicorn api.main:app` + dashboard `cd web && npm run dev`; deploy steps in web/README.md
 
 ## Simulation Target Numbers
 | Metric | Baseline | RAZOR |

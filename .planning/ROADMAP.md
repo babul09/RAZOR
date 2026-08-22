@@ -101,14 +101,14 @@
 
 ### Phase 7 · Next.js Dashboard
 **Objective**: 5-section dashboard, simulation UI, case drill-down
-- [ ] **Overview section**: ₹ at risk | ₹ recovered | recovery rate | Δ vs baseline (Recharts)
-- [ ] **Live Recovery Queue**: table with customer, amount, issue, probability, action badges
-- [ ] **Agent Activity**: timeline component with diagnosis + decision reasoning per case
-- [ ] **Strategy Performance**: table — attempts | recovery % | ₹ recovered
-- [ ] **Simulation section**: "Run Recovery Simulation" button → progress → results table
-- [ ] Case drill-down: full decision timeline + audit trail modal
-- [ ] Policy block visualization: show guardrail trigger in timeline
-- [ ] Real-time polling (or SSE) for live queue updates
+- [x] **Overview section**: ₹ at risk | ₹ recovered | recovery rate | Δ vs baseline (Recharts)
+- [x] **Live Recovery Queue**: table with customer, amount, issue, probability, action badges
+- [x] **Agent Activity**: timeline component with diagnosis + decision reasoning per case
+- [x] **Strategy Performance**: table — attempts | recovery % | ₹ recovered
+- [x] **Simulation section**: "Run Recovery Simulation" button → progress → results table
+- [x] Case drill-down: full decision timeline + audit trail modal
+- [x] Policy block visualization: show guardrail trigger in timeline
+- [x] Real-time polling (or SSE) for live queue updates
 
 **Deliverable**: Dashboard deployed to Vercel, all 5 sections working
 

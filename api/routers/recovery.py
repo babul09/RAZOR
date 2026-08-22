@@ -1,7 +1,11 @@
 """Recovery case read endpoints: queue + detail with decision timeline."""
 from __future__ import annotations
 
+import asyncio
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from api.schemas import CaseDetail, CaseSummary, PaginatedCases, TimelineEntry
@@ -98,3 +102,30 @@ def get_case(case_id: str, db: Session = Depends(get_db)) -> CaseDetail:
         failure_reason=case.failure_reason,
         timeline=timeline,
     )
+
+
+@router.get("/events")
+def recovery_events(db: Session = Depends(get_db)) -> StreamingResponse:
+    """SSE stream of the latest recovery cases (dashboard live queue)."""
+
+    async def event_generator():
+        from fastapi.concurrency import run_in_threadpool
+
+        while True:
+            def snapshot():
+                rows = (
+                    db.query(RecoveryCase)
+                    .order_by(RecoveryCase.priority.desc(), RecoveryCase.created_at.desc())
+                    .limit(50)
+                    .all()
+                )
+                return [_summary(c).model_dump() for c in rows]
+
+            try:
+                items = await run_in_threadpool(snapshot)
+                yield f"data: {json.dumps(items, default=str)}\n\n"
+            except Exception:
+                yield "event: error\ndata: {}\n\n"
+            await asyncio.sleep(3)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
