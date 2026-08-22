@@ -1,0 +1,48 @@
+{
+  "project": {
+    "name": "RAZOR",
+    "full_name": "Revenue AI Zero-loss Operations and Recovery",
+    "type": "hackathon",
+    "currency": "INR",
+    "team_size": 1
+  },
+  "workflow": {
+    "auto_commit": true,
+    "require_plan_approval": true,
+    "require_uat_sign_off": false,
+    "parallel_execution": true,
+    "skip_optional_agents": false
+  },
+  "llm": {
+    "provider": "google",
+    "primary_model": "gemini-pro",
+    "fast_model": "gemini-flash",
+    "use_case": "diagnosis_and_strategy_only"
+  },
+  "ml": {
+    "framework": "scikit-learn",
+    "boost_library": "xgboost",
+    "feature_count_target": 12
+  },
+  "deployment": {
+    "frontend": "vercel",
+    "backend": "railway",
+    "database": "postgresql_managed"
+  },
+  "tech_stack": {
+    "frontend": "nextjs+react+tailwind",
+    "backend": "python+fastapi",
+    "queue": "redis+celery",
+    "charts": "recharts"
+  },
+  "simulation": {
+    "synthetic_event_count": 20000,
+    "demo_event_count": 10000,
+    "baseline_recovery_rate": 0.154
+  },
+  "milestones": {
+    "current": "M1",
+    "total": 4
+  },
+  "created_at": "2026-08-22T11:08:00+05:30"
+}
