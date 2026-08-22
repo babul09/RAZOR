@@ -1,13 +1,21 @@
 # RAZOR — Project State
 
 ## Current Status
-- **Milestone**: M1 — Foundation & Core Intelligence
-- **Active Phase**: Phase 3 · Decision Engine & Policy Guardrails
-- **Workflow State**: EXECUTION_COMPLETE — Phase 3 implementation complete; full test suite (29) passes; demo CLI verified
+- **Milestone**: M2 — Agent Layer & Backend API
+- **Active Phase**: Phase 4 · Diagnosis Agent (Gemini)
+- **Workflow State**: EXECUTION_COMPLETE — Phase 4 implementation complete; full test suite (41) passes; Celery tasks registered on Redis broker
 
 ## Last Action
-- Phase 3 implementation completed: state machine, decision engine (WAIT/STOP, EV), policy hard gate (7 checks, YAML), outcome verifier, demo CLI; PostgreSQL seeded + decisions logged
+- Phase 4 implementation completed: DiagnosisAgent (FR-04 schema, gated Gemini, rule-based fallback), ExplanationAgent, Celery diagnose/explain tasks on Redis; deps clean
 - Date: 2026-08-22
+
+## Phase 4 Locked Decisions
+| Decision | Choice |
+|----------|--------|
+| Async model | Celery + Redis now (Redis running on :6379) |
+| Gemini key | Gated Gemini client + mock tests (no key in .env; rule-based fallback offline) |
+| Explanation agent | Included (`agents/explanation_agent.py`) |
+
 
 ## Phase 3 Locked Decisions
 | Decision | Choice |
@@ -36,8 +44,8 @@
 - Every agent decision logged to audit_logs
 
 ## Next Steps
-1. Run `/gsd-plan-phase 4` for the Diagnosis Agent (Gemini) — M2 begins
-2. Phase 1 pending: confirm `python scripts/seed_db.py` idempotency (already run successfully)
+1. Run `/gsd-plan-phase 5` for the FastAPI backend (M2 continues)
+2. Phase 4 note: `celery -A agents.celery_app worker` for real async; add `GEMINI_API_KEY` to `.env` to enable the live LLM path
 
 ## Simulation Target Numbers
 | Metric | Baseline | RAZOR |

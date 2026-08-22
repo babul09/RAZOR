@@ -55,12 +55,12 @@
 
 ### Phase 4 · Diagnosis Agent (Gemini)
 **Objective**: LLM diagnosis with structured output
-- [ ] Google Gemini API integration (gemini-pro for diagnosis, gemini-flash for explanations)
-- [ ] Prompt engineering: patient history + failure context → structured JSON diagnosis
-- [ ] Output schema: `{ diagnosis, confidence, recommended_timing, reason, avoid_discount }`
-- [ ] Explanation agent: generates human-readable decision explanation for dashboard
-- [ ] Async: LLM calls are non-blocking (Celery task)
-- [ ] Fallback: if LLM unavailable, use rule-based diagnosis
+- [x] Google Gemini API integration (gemini-pro for diagnosis, gemini-flash for explanations)
+- [x] Prompt engineering: patient history + failure context → structured JSON diagnosis
+- [x] Output schema: `{ diagnosis, confidence, recommended_timing, reason, avoid_discount }`
+- [x] Explanation agent: generates human-readable decision explanation for dashboard
+- [x] Async: LLM calls are non-blocking (Celery task)
+- [x] Fallback: if LLM unavailable, use rule-based diagnosis
 
 **Deliverable**: `agents/diagnosis_agent.py` with async `.diagnose(case)` API
 
