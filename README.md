@@ -49,17 +49,20 @@ flowchart LR
 
 ## Setup
 
+> **New to the project?** Follow **[docs/DEMO.md](./docs/DEMO.md)** — a turn-key
+> runbook to get the full demo running, seed data, and connect Razorpay.
+
 ### Prereqs
-- Python 3.11+, Node 18+, PostgreSQL, Redis.
+- Python 3.11+, Node 18+, PostgreSQL, Redis (optional).
 
 ### Backend
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
-cp .env.example .env            # set DATABASE_URL, REDIS_URL
+cp .env.example .env            # set DATABASE_URL, REDIS_URL, optional RAZORPAY_*
 alembic upgrade head             # apply migrations (incl. recovery_memory)
 python scripts/seed_db.py        # idempotent demo dataset (20k)
-python scripts/seed_experiment.py# idempotent demo A/B experiment
+python scripts/demo_data.py --events 800 --reset   # populate the dashboard's live data
 uvicorn api.main:app --reload --port 8000
 ```
 
@@ -67,13 +70,14 @@ uvicorn api.main:app --reload --port 8000
 ```bash
 cd web
 npm install
-npm run dev                       # http://localhost:3000 (NEXT_PUBLIC_API_URL defaults to :8000)
+npm run dev -- -p 3050            # http://localhost:3050 (API defaults to :8000)
 ```
 
 ### Async worker (optional, for real Celery)
 ```bash
 celery -A agents.celery_app worker --loglevel=info
 ```
+The Simulation tab runs inline now, so a worker isn't required for the demo.
 
 ## Razorpay live integration
 
