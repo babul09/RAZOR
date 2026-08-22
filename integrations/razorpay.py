@@ -77,10 +77,15 @@ def _payments_since(days: int) -> int:
     return int((datetime.now(timezone.utc) - timedelta(days=days)).timestamp())
 
 
-def fetch_payments(status: str = "failed", count: int = 50, since_days: int = 30) -> list[dict]:
-    """Fetch recent payments, filtered to ``status`` by default."""
+def fetch_payments(status: str = "failed", count: int = 50, since_days: int = 30) -> tuple[list[dict], str]:
+    """Fetch recent payments, filtered to ``status`` by default.
+
+    Returns ``(items, source)`` where ``source`` is ``"live"`` (real test-API
+    data) or ``"sample"`` (mock fallback used when no keys are set, or when a
+    live account has no payments yet — so the demo always has data).
+    """
     if uses_mock():
-        return _mock_payments(status=status, count=count)
+        return _mock_payments(status=status, count=count), "sample"
     count = max(1, min(count, 100))
     params = {
         "count": count,
@@ -91,17 +96,32 @@ def fetch_payments(status: str = "failed", count: int = 50, since_days: int = 30
     items = data.get("items", [])
     if status:
         items = [p for p in items if p.get("status") == status]
-    return items
+    if not items:
+        # Live account has no payments yet (fresh test keys) — fall back to
+        # sample so the dashboard comparison still renders.
+        return _mock_payments(status=status, count=count), "sample"
+    return items, "live"
 
 
 def fetch_payment(payment_id: str) -> dict:
     if uses_mock():
-        payments = _mock_payments(status="", count=200)
-        for p in payments:
-            if p.get("id") == payment_id:
-                return p
-        raise RazorpayError(f"mock payment not found: {payment_id}")
-    return _request("GET", f"/payments/{payment_id}")
+        return _mock_lookup(payment_id)
+    try:
+        return _request("GET", f"/payments/{payment_id}")
+    except RazorpayError:
+        # Payment may be a sample row from the fallback feed — resolve locally.
+        try:
+            return _mock_lookup(payment_id)
+        except RazorpayError:
+            raise
+
+
+def _mock_lookup(payment_id: str) -> dict:
+    payments = _mock_payments(status="", count=200)
+    for p in payments:
+        if p.get("id") == payment_id:
+            return p
+    raise RazorpayError(f"payment not found: {payment_id}")
 
 
 def fetch_payment_links(count: int = 25) -> list[dict]:

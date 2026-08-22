@@ -24,6 +24,11 @@ const config: Config = {
           DEFAULT: "#F4707B",
           dim: "#C24A57",
         },
+        rpay: {
+          blue: "#4E7CFF",
+          light: "#6E9BFF",
+          navy: "#0A2540",
+        },
         fg: {
           DEFAULT: "#E8EDF6",
           muted: "#8B96AE",

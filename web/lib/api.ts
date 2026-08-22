@@ -89,6 +89,7 @@ export interface RazorpaySimSide {
 
 export interface RazorpayComparison {
   configured: boolean;
+  source: string;
   at_risk_paise: number;
   baseline: RazorpaySimSide;
   razor: RazorpaySimSide;
@@ -181,6 +182,7 @@ export function getRazorpayLinks(count = 25): Promise<RazorpayLink[]> {
 export function getRazorpayComparison(count = 50): Promise<RazorpayComparison> {
   const empty: RazorpayComparison = {
     configured: false,
+    source: "sample",
     at_risk_paise: 0,
     baseline: { total_recovered_paise: 0, recovery_rate: 0, net_recovered_paise: 0, interventions: 0 },
     razor: { total_recovered_paise: 0, recovery_rate: 0, net_recovered_paise: 0, interventions: 0 },

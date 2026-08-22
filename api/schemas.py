@@ -180,6 +180,7 @@ class RazorpaySimSide(BaseModel):
 
 class RazorpayComparison(BaseModel):
     configured: bool
+    source: str = "live"  # "live" | "sample"
     at_risk_paise: int
     baseline: RazorpaySimSide
     razor: RazorpaySimSide

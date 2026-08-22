@@ -87,7 +87,7 @@ def list_payments(count: int = 50, status: str = "failed") -> list[RazorpayPayme
     if not razorpay.is_configured() and not razorpay.uses_mock():
         raise http_error(400, "razorpay_not_configured", "set RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET")
     try:
-        items = razorpay.fetch_payments(status=status, count=count)
+        items, _source = razorpay.fetch_payments(status=status, count=count)
     except razorpay.RazorpayError as exc:
         raise http_error(502, "razorpay_error", str(exc))
     return [_to_payment(p) for p in items]
@@ -160,13 +160,14 @@ def comparison(count: int = 50) -> RazorpayComparison:
     if not razorpay.is_configured() and not razorpay.uses_mock():
         return RazorpayComparison(
             configured=False,
+            source="sample",
             at_risk_paise=0,
             baseline=RazorpaySimSide(total_recovered_paise=0, recovery_rate=0.0, net_recovered_paise=0, interventions=0),
             razor=RazorpaySimSide(total_recovered_paise=0, recovery_rate=0.0, net_recovered_paise=0, interventions=0),
             incremental_paise=0,
         )
     try:
-        items = razorpay.fetch_payments(status="failed", count=count)
+        items, source = razorpay.fetch_payments(status="failed", count=count)
     except razorpay.RazorpayError as exc:
         raise http_error(502, "razorpay_error", str(exc))
 
@@ -197,6 +198,7 @@ def comparison(count: int = 50) -> RazorpayComparison:
     )
     return RazorpayComparison(
         configured=razorpay.is_configured(),
+        source=source,
         at_risk_paise=at_risk,
         baseline=baseline,
         razor=razor,

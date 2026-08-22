@@ -78,44 +78,59 @@ export default function RazorpaySection() {
   if (!health || !cmp) return <Loading label="Loading Razorpay live feed" />;
 
   const demo = !health.configured;
+  const sample = cmp.source === "sample";
   const maxRecovered = Math.max(cmp.baseline.total_recovered_paise, cmp.razor.total_recovered_paise, 1);
 
   return (
     <section className="space-y-4">
-      <div className="flex items-baseline justify-between">
-        <p className="font-mono text-eyebrow uppercase text-fg-muted">
-          Razorpay · live recovery
-        </p>
-        <span
-          className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest ${
-            demo ? "border-gold/40 text-gold" : "border-mint/40 text-mint"
-          }`}
-        >
-          {demo ? "demo data" : `test api · ${health.key_id_masked}`}
-        </span>
+      {/* Razorpay-branded header — a slice of the payment-link checkout. */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-rpay-navy px-4 py-3 shadow-card">
+        <div className="flex items-center gap-3">
+          <span className="grid h-9 w-9 place-items-center rounded-[0.5rem] bg-rpay-blue font-display text-lg font-black text-white">
+            R
+          </span>
+          <div className="leading-tight">
+            <p className="font-display text-sm font-bold tracking-wide text-white">Razorpay</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">
+              recovery terminal · live
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-white/80">
+            <span className={`h-2 w-2 rounded-full ${demo ? "bg-white/40" : "bg-mint"}`} />
+            {demo ? "demo mode" : "test api connected"}
+          </span>
+          {health.key_id_masked && (
+            <span className="hidden rounded-full border border-white/20 px-2 py-0.5 font-mono text-[10px] text-white/70 sm:inline">
+              {health.key_id_masked}
+            </span>
+          )}
+        </div>
       </div>
 
-      {demo && (
-        <p className="rounded-card border border-line bg-ink-900 p-3 font-mono text-xs text-fg-muted">
-          No test keys set — showing realistic mock data. Add{" "}
-          <span className="text-gold">RAZORPAY_KEY_ID</span> /{" "}
-          <span className="text-gold">RAZORPAY_KEY_SECRET</span> to{" "}
-          <span className="text-fg">.env</span> to switch to the live test API.
+      {sample && (
+        <p className="rounded-card border border-rpay-blue/30 bg-ink-900 p-3 font-mono text-xs text-fg-muted">
+          {demo ? (
+            <>No test keys set — showing sample data. Add <span className="text-rpay-light">RAZORPAY_KEY_ID</span> / <span className="text-rpay-light">RAZORPAY_KEY_SECRET</span> to <span className="text-fg">.env</span>.</>
+          ) : (
+            <>Live keys connected, but the test account has no failed payments yet — showing sample data. "Recover" still creates a <span className="text-rpay-light">real payment link</span> on the test API.</>
+          )}
         </p>
       )}
 
       {/* Side-by-side comparison — the thesis. */}
       {cmp.at_risk_paise > 0 && (
         <>
-          <div className="rounded-card border border-gold/30 bg-ink-900 p-5 shadow-card">
+          <div className="rounded-card border border-rpay-blue/30 bg-ink-900 p-5 shadow-card">
             <p className="font-mono text-[11px] uppercase tracking-wider text-fg-muted">
               Incremental recovery vs baseline · {formatInr(cmp.at_risk_paise)} at risk
             </p>
-            <p className="money font-display text-hero text-mint">
+            <p className="money font-display text-hero text-rpay-light">
               {formatInrSigned(cmp.incremental_paise)}
             </p>
             <div className="mt-3 flex flex-wrap gap-4 font-mono text-xs text-fg-muted">
-              <span>RAZOR rate <span className="text-fg">{(cmp.razor.recovery_rate * 100).toFixed(1)}%</span></span>
+              <span>RAZOR rate <span className="text-rpay-light">{(cmp.razor.recovery_rate * 100).toFixed(1)}%</span></span>
               <span>Baseline rate <span className="text-fg">{(cmp.baseline.recovery_rate * 100).toFixed(1)}%</span></span>
               <span>{payments.length} failed payments</span>
             </div>
@@ -123,7 +138,7 @@ export default function RazorpaySection() {
 
           <div className="grid gap-4 rounded-card border border-line bg-ink-900 p-4 shadow-card sm:grid-cols-2">
             <CmpBar label="Baseline recovered" paise={cmp.baseline.total_recovered_paise} max={maxRecovered} accent="text-fg-muted" />
-            <CmpBar label="RAZOR recovered" paise={cmp.razor.total_recovered_paise} max={maxRecovered} accent="text-gold" />
+            <CmpBar label="RAZOR recovered" paise={cmp.razor.total_recovered_paise} max={maxRecovered} accent="text-rpay-light" />
           </div>
 
           <div className="overflow-x-auto rounded-card border border-line bg-ink-900 shadow-card">
@@ -147,7 +162,7 @@ export default function RazorpaySection() {
                     <td className="money px-4 py-2.5 text-right text-fg-muted">
                       {row.pct ? `${(row.b * 100).toFixed(1)}%` : row.count ? row.b : formatInr(row.b)}
                     </td>
-                    <td className="money px-4 py-2.5 text-right text-gold">
+                    <td className="money px-4 py-2.5 text-right text-rpay-light">
                       {row.pct ? `${(row.r * 100).toFixed(1)}%` : row.count ? row.r : formatInr(row.r)}
                     </td>
                   </tr>
@@ -160,14 +175,14 @@ export default function RazorpaySection() {
 
       {/* Recovery result */}
       {recovered && recovered.short_url && (
-        <div className="rounded-card border border-mint/40 bg-ink-900 p-4 shadow-card">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-mint">Payment link created</p>
+        <div className="rounded-card border border-rpay-blue/40 bg-ink-900 p-4 shadow-card">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-rpay-light">Payment link created</p>
           <div className="mt-1 flex flex-wrap items-center gap-3">
             <a
               href={recovered.short_url}
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-sm text-gold underline underline-offset-4"
+              className="font-mono text-sm text-rpay-light underline underline-offset-4"
             >
               {recovered.short_url}
             </a>
@@ -185,7 +200,7 @@ export default function RazorpaySection() {
           <span className="font-mono text-[11px] uppercase tracking-wider text-fg-muted">Failed payments</span>
           <button
             onClick={load}
-            className="font-mono text-[11px] uppercase tracking-wider text-gold hover:underline"
+            className="font-mono text-[11px] uppercase tracking-wider text-rpay-light hover:underline"
           >
             refresh
           </button>
@@ -211,7 +226,7 @@ export default function RazorpaySection() {
                   <button
                     onClick={() => handleRecover(p)}
                     disabled={recovering === p.id}
-                    className="rounded-card bg-gold px-3 py-1 font-mono text-xs font-semibold text-ink-950 transition-opacity hover:opacity-90 disabled:opacity-50"
+                    className="rounded-card bg-rpay-blue px-3 py-1 font-mono text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                   >
                     {recovering === p.id ? "…" : "Recover"}
                   </button>
