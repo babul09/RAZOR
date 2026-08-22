@@ -2,19 +2,20 @@
 
 ## Current Status
 - **Milestone**: M2 — Agent Layer & Backend API
-- **Active Phase**: Phase 4 · Diagnosis Agent (Gemini)
-- **Workflow State**: EXECUTION_COMPLETE — Phase 4 implementation complete; full test suite (41) passes; Celery tasks registered on Redis broker
+- **Active Phase**: Phase 5 · FastAPI Backend
+- **Workflow State**: EXECUTION_COMPLETE — Phase 5 implementation complete; full test suite (53) passes; Celery async simulation verified on Redis broker
 
 ## Last Action
-- Phase 4 implementation completed: DiagnosisAgent (FR-04 schema, gated Gemini, rule-based fallback), ExplanationAgent, Celery diagnose/explain tasks on Redis; deps clean
+- Phase 5 implementation completed: FastAPI app (health, recovery queue/detail, analytics with Redis cache, events/ingest + risk engine, Celery async simulation, experiments); real-broker smoke passed
 - Date: 2026-08-22
 
-## Phase 4 Locked Decisions
+## Phase 5 Locked Decisions
 | Decision | Choice |
 |----------|--------|
-| Async model | Celery + Redis now (Redis running on :6379) |
-| Gemini key | Gated Gemini client + mock tests (no key in .env; rule-based fallback offline) |
-| Explanation agent | Included (`agents/explanation_agent.py`) |
+| Auth | None (open demo endpoints) |
+| Simulation run | Celery async job (job_id + status polling) |
+| Experiments endpoint | Reads DB (may be empty until Phase 6) |
+| Risk engine (FR-02) | Include risk scoring on payment.failed ingest |
 
 
 ## Phase 3 Locked Decisions
@@ -44,8 +45,8 @@
 - Every agent decision logged to audit_logs
 
 ## Next Steps
-1. Run `/gsd-plan-phase 5` for the FastAPI backend (M2 continues)
-2. Phase 4 note: `celery -A agents.celery_app worker` for real async; add `GEMINI_API_KEY` to `.env` to enable the live LLM path
+1. Run `/gsd-plan-phase 6` for Recovery Memory + Experiment Engine (M3 begins)
+2. Phase 5 note: run `uvicorn api.main:app` to serve; `celery -A agents.celery_app worker` for async tasks
 
 ## Simulation Target Numbers
 | Metric | Baseline | RAZOR |

@@ -90,3 +90,22 @@ class SimpleDiagnosis:
 
     def __init__(self, diagnosis: str):
         self.diagnosis = diagnosis
+
+
+@celery_app.task(name="run_simulation")
+def run_simulation(n_events: int, seed: int = 42, hour: int = 14) -> dict:
+    """Run the baseline + RAZOR simulators and return the comparison dict (FR-13)."""
+    from dataclasses import asdict
+
+    from simulation.baseline_simulator import BaselineSimulator
+    from simulation.generator import SyntheticDataGenerator
+    from simulation.razor_simulator import RazorSimulator
+
+    dataset = SyntheticDataGenerator(seed=seed).generate(n_events)
+    baseline = BaselineSimulator(seed=seed).run(dataset.events)
+    razor = RazorSimulator(seed=seed).run(dataset.events, current_hour=hour)
+    return {
+        "baseline": asdict(baseline),
+        "razor": asdict(razor),
+        "incremental_paise": razor.net_recovered_paise - baseline.net_recovered_paise,
+    }

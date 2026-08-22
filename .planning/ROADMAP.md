@@ -68,15 +68,15 @@
 
 ### Phase 5 · FastAPI Backend
 **Objective**: REST API serving all frontend needs
-- [ ] `GET /api/recovery/cases` — paginated recovery queue
-- [ ] `GET /api/recovery/cases/{id}` — case detail + decision timeline
-- [ ] `POST /api/simulation/run` — trigger simulation with N events
-- [ ] `GET /api/analytics/overview` — ₹ at risk, recovered, recovery rate
-- [ ] `GET /api/analytics/strategies` — per-strategy performance table
-- [ ] `GET /api/experiments` — A/B experiment results
-- [ ] `POST /api/events/ingest` — webhook endpoint for events
-- [ ] Celery workers: async diagnosis + action execution
-- [ ] Redis: task queue + caching for dashboard metrics
+- [x] `GET /api/recovery/cases` — paginated recovery queue
+- [x] `GET /api/recovery/cases/{id}` — case detail + decision timeline
+- [x] `POST /api/simulation/run` — trigger simulation with N events
+- [x] `GET /api/analytics/overview` — ₹ at risk, recovered, recovery rate
+- [x] `GET /api/analytics/strategies` — per-strategy performance table
+- [x] `GET /api/experiments` — A/B experiment results
+- [x] `POST /api/events/ingest` — webhook endpoint for events
+- [x] Celery workers: async diagnosis + action execution
+- [x] Redis: task queue + caching for dashboard metrics
 
 **Deliverable**: Backend serving all API endpoints, Celery workers running
 
