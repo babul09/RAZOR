@@ -30,10 +30,14 @@ GEMINI_API_KEY=AIza...
 ```
 Sanity-check it works:
 ```bash
-python -c "import google.generativeai as g; g.configure(api_key=__import__('config').settings.gemini_api_key); print(g.GenerativeModel('gemini-1.5-flash').generate_content('reply OK').text)"
+python -c "import google.generativeai as g; g.configure(api_key=__import__('config').settings.gemini_api_key); print(g.GenerativeModel('gemini-2.5-flash').generate_content('reply OK').text)"
 ```
-> Models default to `gemini-1.5-flash`. If you get `API_KEY_INVALID`, the key is bad —
-> there's no amount of redeploying that fixes that; replace the key.
+> Models default to `gemini-2.5-flash` (the stable, available model for this key).
+> If you get `API_KEY_INVALID`, the key is bad — replace it. If you get a `404 model
+> ... not found`, list your available models and pick one:
+> ```bash
+> python -c "import google.generativeai as g; g.configure(api_key=__import__('config').settings.gemini_api_key); [print(m.name) for m in g.list_models() if 'generateContent' in m.supported_generation_methods]"
+> ```
 
 ---
 
