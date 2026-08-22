@@ -8,6 +8,7 @@ from types import SimpleNamespace
 import pytest
 
 from agents.diagnosis_agent import Diagnosis, DiagnosisAgent
+from config import settings
 from db.database import SessionLocal
 from db.models import (
     AgentDecision,
@@ -66,7 +67,8 @@ def _decision(strategy: str = "RETRY", reasoning: str = "best EV", net: int = 30
 # ---------------------------------------------------------------------------
 
 
-def test_rule_based_fallback_offline():
+def test_rule_based_fallback_offline(monkeypatch):
+    monkeypatch.setattr(settings, "gemini_api_key", "")  # force offline
     agent = DiagnosisAgent()  # no key, no mock
     d = agent.diagnose(_case(), customer=_customer(), profile=_profile(0.6))
     assert isinstance(d, Diagnosis)
@@ -105,7 +107,8 @@ def test_llm_json_in_code_fence_parsed():
     assert d.avoid_discount is True
 
 
-def test_avoid_discount_flag():
+def test_avoid_discount_flag(monkeypatch):
+    monkeypatch.setattr(settings, "gemini_api_key", "")  # force offline
     agent = DiagnosisAgent()
     small = agent.diagnose(_case(amount_at_risk_paise=50_000))
     large = agent.diagnose(_case(amount_at_risk_paise=900_000))
@@ -127,9 +130,10 @@ def test_agent_never_executes_payment():
 # ---------------------------------------------------------------------------
 
 
-def test_explanation_template_fallback():
+def test_explanation_template_fallback(monkeypatch):
     from agents.explanation_agent import ExplanationAgent
 
+    monkeypatch.setattr(settings, "gemini_api_key", "")  # force offline
     agent = ExplanationAgent()  # no key, no mock
     d = agent.explain(_decision("RETRY"), _case())
     assert isinstance(d, str) and d
@@ -145,9 +149,10 @@ def test_explanation_gemini_path_with_mock():
     assert "Retry tonight" in d
 
 
-def test_explanation_mentions_strategy():
+def test_explanation_mentions_strategy(monkeypatch):
     from agents.explanation_agent import ExplanationAgent
 
+    monkeypatch.setattr(settings, "gemini_api_key", "")  # force offline
     agent = ExplanationAgent()
     d = agent.explain(_decision("WHATSAPP_REMINDER"), _case())
     assert "WHATSAPP_REMINDER" in d
