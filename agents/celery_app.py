@@ -21,4 +21,9 @@ celery_app.conf.update(
     result_serializer="json",
     accept_content=["json"],
     task_always_eager=False,
+    # Fail fast when the Redis broker is down so the API can fall back to a
+    # synchronous (inline) run instead of leaving a task stuck in PENDING.
+    broker_connection_timeout=2,
+    broker_connection_retry_on_startup=False,
+    broker_transport_options={"max_retries": 1},
 )
