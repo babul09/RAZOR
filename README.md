@@ -75,6 +75,30 @@ npm run dev                       # http://localhost:3000 (NEXT_PUBLIC_API_URL d
 celery -A agents.celery_app worker --loglevel=info
 ```
 
+## Razorpay live integration
+
+The dashboard's **Razorpay** tab shows a side-by-side comparison (baseline vs
+RAZOR) over failed payments and lets you recover a payment with a one-click
+[Razorpay Payment Link](https://razorpay.com/docs/api/payment-links/) — using
+real payments when test keys are configured, and realistic mock data otherwise.
+
+**Add your Razorpay test keys** (Dashboard → Account → API Keys):
+```bash
+# .env
+RAZORPAY_KEY_ID=rzp_test_xxxx
+RAZORPAY_KEY_SECRET=xxxxxxxx
+```
+With keys set, the API hits the live sandbox:
+- `GET  /api/razorpay/payments` — recent failed payments
+- `GET  /api/razorpay/comparison` — baseline vs RAZOR over those payments
+- `POST /api/razorpay/recover` — score a payment, choose a strategy, create a Payment Link
+- `GET  /api/razorpay/links` — payment links created
+
+Without keys, `RAZORPAY_MOCK=true` (default) serves realistic mock data with the
+same response shape so the demo always works. The UI labels it clearly as
+**demo data** vs **test api**.
+```
+
 ---
 
 ## Demo / Simulation

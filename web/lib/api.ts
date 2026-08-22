@@ -53,6 +53,58 @@ export interface SimulationStatus {
   result: Record<string, unknown> | null;
 }
 
+export interface RazorpayHealth {
+  configured: boolean;
+  mode: string;
+  key_id_masked: string | null;
+}
+
+export interface RazorpayPayment {
+  id: string;
+  amount_paise: number;
+  currency: string;
+  status: string;
+  method: string;
+  email: string | null;
+  contact: string | null;
+  failure_code: string | null;
+  failure_reason: string | null;
+  created_at: number | null;
+}
+
+export interface RazorpayLink {
+  id: string;
+  amount_paise: number;
+  status: string;
+  short_url: string | null;
+  created_at: number | null;
+}
+
+export interface RazorpaySimSide {
+  total_recovered_paise: number;
+  recovery_rate: number;
+  net_recovered_paise: number;
+  interventions: number;
+}
+
+export interface RazorpayComparison {
+  configured: boolean;
+  at_risk_paise: number;
+  baseline: RazorpaySimSide;
+  razor: RazorpaySimSide;
+  incremental_paise: number;
+}
+
+export interface RazorpayRecover {
+  payment_id: string;
+  amount_paise: number;
+  strategy: string;
+  recovery_probability: number;
+  link_id: string | null;
+  short_url: string | null;
+  link_status: string | null;
+}
+
 async function getJson<T>(path: string, fallback: T): Promise<T> {
   try {
     const res = await fetch(`${API_URL}${path}`, { cache: "no-store" });
@@ -108,6 +160,58 @@ export function getSimulationStatus(jobId: string): Promise<SimulationStatus> {
     },
   };
   return getJson(`/api/simulation/status/${jobId}`, fallback);
+}
+
+export function getRazorpayHealth(): Promise<RazorpayHealth> {
+  return getJson("/api/razorpay/health", {
+    configured: false,
+    mode: "demo",
+    key_id_masked: null,
+  });
+}
+
+export function getRazorpayPayments(count = 50): Promise<RazorpayPayment[]> {
+  return getJson(`/api/razorpay/payments?count=${count}`, []);
+}
+
+export function getRazorpayLinks(count = 25): Promise<RazorpayLink[]> {
+  return getJson(`/api/razorpay/links?count=${count}`, []);
+}
+
+export function getRazorpayComparison(count = 50): Promise<RazorpayComparison> {
+  const empty: RazorpayComparison = {
+    configured: false,
+    at_risk_paise: 0,
+    baseline: { total_recovered_paise: 0, recovery_rate: 0, net_recovered_paise: 0, interventions: 0 },
+    razor: { total_recovered_paise: 0, recovery_rate: 0, net_recovered_paise: 0, interventions: 0 },
+    incremental_paise: 0,
+  };
+  return getJson(`/api/razorpay/comparison?count=${count}`, empty);
+}
+
+export async function razorpayRecover(
+  paymentId: string,
+  customer?: { name?: string; email?: string; contact?: string }
+): Promise<RazorpayRecover> {
+  try {
+    const res = await fetch(`${API_URL}/api/razorpay/recover`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payment_id: paymentId, ...customer }),
+    });
+    if (!res.ok) throw new Error("recover failed");
+    return await res.json();
+  } catch {
+    return {
+      payment_id: paymentId,
+      amount_paise: 0,
+      strategy: "RETRY",
+      recovery_probability: 0.5,
+      link_id: null,
+      short_url: null,
+      link_status: null,
+    };
+  }
 }
 
 export function formatInr(paise: number): string {

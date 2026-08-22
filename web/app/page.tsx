@@ -5,15 +5,17 @@ import { useState } from "react";
 import AgentActivitySection from "@/components/AgentActivitySection";
 import CaseDrillDown from "@/components/CaseDrillDown";
 import OverviewSection from "@/components/OverviewSection";
+import RazorpaySection from "@/components/RazorpaySection";
 import RecoveryQueueSection from "@/components/RecoveryQueueSection";
 import SimulationSection from "@/components/SimulationSection";
 import StrategyPerformanceSection from "@/components/StrategyPerformanceSection";
 
-type Tab = "overview" | "queue" | "activity" | "strategies" | "simulation";
+type Tab = "overview" | "queue" | "activity" | "strategies" | "simulation" | "razorpay";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "◈" },
   { id: "queue", label: "Recovery Queue", icon: "▤" },
+  { id: "razorpay", label: "Razorpay", icon: "⛁" },
   { id: "activity", label: "Agent Activity", icon: "◌" },
   { id: "strategies", label: "Strategy", icon: "≋" },
   { id: "simulation", label: "Simulation", icon: "▶" },
@@ -65,6 +67,7 @@ export default function Home() {
         <div>
           {tab === "overview" && <OverviewSection />}
           {tab === "queue" && <RecoveryQueueSection onSelect={setSelectedCase} />}
+          {tab === "razorpay" && <RazorpaySection />}
           {tab === "activity" && <AgentActivitySection caseId={selectedCase || "case-1"} />}
           {tab === "strategies" && <StrategyPerformanceSection />}
           {tab === "simulation" && <SimulationSection />}

@@ -122,3 +122,66 @@ class EventIngestResponse(BaseModel):
     ingested: bool
     duplicate: bool = False
     recovery_case_id: str | None = None
+
+
+# --- Razorpay integration (Phase 9) ---
+
+
+class RazorpayHealth(BaseModel):
+    configured: bool
+    mode: str  # "test" | "demo"
+    key_id_masked: str | None = None
+
+
+class RazorpayPayment(BaseModel):
+    id: str
+    amount_paise: int
+    currency: str = "INR"
+    status: str
+    method: str
+    email: str | None = None
+    contact: str | None = None
+    failure_code: str | None = None
+    failure_reason: str | None = None
+    created_at: int | None = None
+
+
+class RazorpayLink(BaseModel):
+    id: str
+    amount_paise: int
+    status: str
+    short_url: str | None = None
+    created_at: int | None = None
+
+
+class RazorpayRecoverRequest(BaseModel):
+    payment_id: str
+    name: str | None = None
+    email: str | None = None
+    contact: str | None = None
+
+
+class RazorpayRecoverResponse(BaseModel):
+    payment_id: str
+    amount_paise: int
+    strategy: str
+    recovery_probability: float
+    link_id: str | None = None
+    short_url: str | None = None
+    link_status: str | None = None
+
+
+class RazorpaySimSide(BaseModel):
+    total_recovered_paise: int
+    recovery_rate: float
+    net_recovered_paise: int
+    interventions: int = 0
+
+
+class RazorpayComparison(BaseModel):
+    configured: bool
+    at_risk_paise: int
+    baseline: RazorpaySimSide
+    razor: RazorpaySimSide
+    incremental_paise: int
+
