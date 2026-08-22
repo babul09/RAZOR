@@ -51,6 +51,17 @@ def diagnose_case(case_id: str) -> dict:
         session.close()
 
 
+def dispatch_diagnosis(case_id: str) -> str:
+    """Dispatch async diagnosis via Celery, falling back to an inline (eager) run
+    when no broker/worker is reachable, so diagnosis always completes."""
+    try:
+        async_result = diagnose_case.delay(case_id)
+        return async_result.id
+    except Exception:
+        diagnose_case.run(case_id)
+        return "inline"
+
+
 @celery_app.task(name="explain_decision")
 def explain_decision(case_id: str) -> dict:
     """Asynchronously produce a human-readable explanation for a case's decision."""

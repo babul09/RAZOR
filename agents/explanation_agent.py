@@ -12,7 +12,7 @@ from config import settings
 
 
 class ExplanationAgent:
-    def __init__(self, client: Any | None = None, model: str = "gemini-flash"):
+    def __init__(self, client: Any | None = None, model: str = "gemini-1.5-flash"):
         self.model = model
         if client is not None:
             self.client = client

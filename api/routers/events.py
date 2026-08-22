@@ -19,6 +19,7 @@ from engine.risk_engine import (
     compute_risk_score,
     customer_value_factor,
 )
+from agents.tasks import dispatch_diagnosis
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
@@ -102,6 +103,9 @@ def ingest(payload: EventIngestRequest, db: Session = Depends(get_db)) -> EventI
         recovery_case_id = case.id
 
     db.commit()
+    if recovery_case_id is not None:
+        # Trigger async Gemini diagnosis via Celery (inline fallback if broker down).
+        dispatch_diagnosis(recovery_case_id)
     return EventIngestResponse(
         event_id=payload.event_id,
         event_type=payload.event_type,

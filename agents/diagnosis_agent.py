@@ -63,7 +63,7 @@ def _extract_json_object(text: str) -> dict | None:
 
 
 class DiagnosisAgent:
-    def __init__(self, client: Any | None = None, model: str = "gemini-pro"):
+    def __init__(self, client: Any | None = None, model: str = "gemini-1.5-flash"):
         self.model = model
         if client is not None:
             self.client = client
