@@ -97,6 +97,13 @@ With keys set, the API hits the live sandbox:
 Without keys, `RAZORPAY_MOCK=true` (default) serves realistic mock data with the
 same response shape so the demo always works. The UI labels it clearly as
 **demo data** vs **test api**.
+
+**Seed the test account** with realistic Orders + Payment Links:
+```bash
+python scripts/seed_razorpay.py            # 10 orders + 10 payment links
+python scripts/seed_razorpay.py --n 5      # fewer
+python scripts/seed_razorpay.py --links-only
+```
 ```
 
 ---

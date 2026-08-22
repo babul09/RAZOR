@@ -128,7 +128,7 @@ def fetch_payment_links(count: int = 25) -> list[dict]:
     if uses_mock():
         return _mock_links(count)
     data = _request("GET", "/payment_links", params={"count": max(1, min(count, 100))})
-    return data.get("items", [])
+    return data.get("payment_links") or data.get("items") or []
 
 
 def create_payment_link(
@@ -162,6 +162,33 @@ def create_payment_link(
     if customer:
         payload["customer"] = customer
     return _request("POST", "/payment_links", json=payload)
+
+
+def create_order(
+    amount_paise: int,
+    *,
+    receipt: str = "",
+    notes: dict | None = None,
+    currency: str = "INR",
+) -> dict:
+    """Create a Razorpay Order (test mode) — seeds real objects into the account."""
+    if uses_mock():
+        return {
+            "id": "order_mock00000000",
+            "entity": "order",
+            "amount": int(amount_paise),
+            "currency": currency,
+            "status": "created",
+            "receipt": receipt,
+            "notes": notes or {},
+        }
+    payload = {
+        "amount": int(amount_paise),
+        "currency": currency,
+        "receipt": receipt,
+        "notes": notes or {},
+    }
+    return _request("POST", "/orders", json=payload)
 
 
 def categorize_failure(payment: dict) -> str:
