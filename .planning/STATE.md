@@ -2,12 +2,20 @@
 
 ## Current Status
 - **Milestone**: M1 — Foundation & Core Intelligence
-- **Active Phase**: Phase 1 · Data & Simulation Foundation
-- **Workflow State**: EXECUTION_COMPLETE — Phase 1 implementation complete; database verification pending PostgreSQL
+- **Active Phase**: Phase 3 · Decision Engine & Policy Guardrails
+- **Workflow State**: EXECUTION_COMPLETE — Phase 3 implementation complete; full test suite (29) passes; demo CLI verified
 
 ## Last Action
-- Phase 1 implementation completed: data generator, simulators, evaluator, CLI, seed script, and README
+- Phase 3 implementation completed: state machine, decision engine (WAIT/STOP, EV), policy hard gate (7 checks, YAML), outcome verifier, demo CLI; PostgreSQL seeded + decisions logged
 - Date: 2026-08-22
+
+## Phase 3 Locked Decisions
+| Decision | Choice |
+|----------|--------|
+| Audit log storage | Direct PostgreSQL writes (role `razor` / `razor_db` running, migrated) |
+| Outcome verifier (FR-10) | Included in Phase 3 |
+| WAIT timing | Configurable per-merchant window (policy YAML) |
+| Demo delivery | Seed DB + CLI (`scripts/demo_decision_engine.py`) |
 
 ## Key Decisions Made
 | Decision | Choice | Rationale |
@@ -28,9 +36,8 @@
 - Every agent decision logged to audit_logs
 
 ## Next Steps
-1. Start PostgreSQL and run `alembic upgrade head`
-2. Run `python scripts/seed_db.py` twice to verify idempotency
-3. Run `/gsd-plan-phase 2` for the ML recovery prediction model
+1. Run `/gsd-plan-phase 4` for the Diagnosis Agent (Gemini) — M2 begins
+2. Phase 1 pending: confirm `python scripts/seed_db.py` idempotency (already run successfully)
 
 ## Simulation Target Numbers
 | Metric | Baseline | RAZOR |

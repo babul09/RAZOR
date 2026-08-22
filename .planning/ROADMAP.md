@@ -24,12 +24,12 @@
 
 ### Phase 2 · ML Recovery Prediction Model
 **Objective**: Trained model that outputs P(recovery | strategy)
-- [ ] Feature engineering pipeline (12 features from requirements)
-- [ ] Train logistic regression baseline model
-- [ ] Train XGBoost model; compare vs baseline
-- [ ] Per-strategy probability output: RETRY, METHOD_SWITCH, WHATSAPP, EMAIL, DISCOUNT
-- [ ] Model persistence (joblib / pickle)
-- [ ] Unit tests: model outputs valid probabilities for all strategy types
+- [x] Feature engineering pipeline (12 features from requirements)
+- [x] Train logistic regression baseline model
+- [x] Train XGBoost model; compare vs baseline
+- [x] Per-strategy probability output: RETRY, METHOD_SWITCH, WHATSAPP, EMAIL, DISCOUNT
+- [x] Model persistence (joblib / pickle)
+- [x] Unit tests: model outputs valid probabilities for all strategy types
 
 **Deliverable**: `ml/recovery_model.py` with `.predict_proba(features, strategy)` API
 
@@ -37,13 +37,13 @@
 
 ### Phase 3 · Decision Engine & Policy Guardrails
 **Objective**: Strategy engine + policy enforcement
-- [ ] Strategy engine: expected net recovery calculation per strategy
-- [ ] WAIT strategy: compares now vs N-hours-later expected value
-- [ ] STOP strategy: abandons if max(expected_net) < 0
-- [ ] Policy engine: loads merchant YAML config, enforces all 7 policy checks
-- [ ] Audit log: every decision writes to `agent_decisions` + `audit_logs`
-- [ ] Recovery state machine: all 12 states, deterministic transitions
-- [ ] Demo: policy blocks discount offer; agent chooses WAIT over immediate retry
+- [x] Strategy engine: expected net recovery calculation per strategy
+- [x] WAIT strategy: compares now vs N-hours-later expected value
+- [x] STOP strategy: abandons if max(expected_net) < 0
+- [x] Policy engine: loads merchant YAML config, enforces all 7 policy checks
+- [x] Audit log: every decision writes to `agent_decisions` + `audit_logs`
+- [x] Recovery state machine: all 12 states, deterministic transitions
+- [x] Demo: policy blocks discount offer; agent chooses WAIT over immediate retry
 
 **Deliverable**: `engine/decision_engine.py` + `engine/policy_engine.py` + `engine/state_machine.py`
 

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+*.egg
+
+# Environment
+.env
+!.env.example
+
+# Generated simulation data (too large for git)
+simulation/data/
+!simulation/data/.gitkeep
+
+# ML models
+ml/models/*.joblib
+ml/models/*.pkl
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
