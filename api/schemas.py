@@ -49,6 +49,38 @@ class AnalyticsOverview(BaseModel):
     recovery_rate: float
     total_cases: int
     recovered_cases: int
+    # At-risk value over cases that actually reached an executed outcome (the
+    # measured-real-batch scope used for the baseline / incremental headline).
+    executed_at_risk_paise: int = 0
+    # Measured money: incremental vs a baseline over the EXECUTED batch. None
+    # when no recovery outcome has been executed yet (honest no-data state).
+    incremental_paise: int | None = None
+
+
+class BatchSourceMetric(BaseModel):
+    source_type: str
+    processed: int = 0
+    attempts: int = 0
+    recoveries: int = 0
+    at_risk_paise: int = 0
+    recovered_paise: int = 0
+    cost_paise: int = 0
+
+
+class RecoveryBatchRequest(BaseModel):
+    source_types: list[str] | None = None
+    limit: int = 100
+
+
+class RecoveryBatchReport(BaseModel):
+    processed_cases: int
+    executed: int
+    recoveries: int
+    at_risk_paise: int
+    recovered_paise: int
+    cost_paise: int
+    incremental_paise: int
+    per_source: list[BatchSourceMetric]
 
 
 class StrategyMetric(BaseModel):
@@ -70,7 +102,12 @@ class SimulationRunResponse(BaseModel):
 
 
 class SimulationStatusResponse(BaseModel):
-    status: str  # PENDING | SUCCESS | FAILURE
+    status: str  # queued | running | succeeded | failed
+    stage: str | None = None
+    completed: int | None = None
+    total: int | None = None
+    execution_mode: str | None = None
+    error: str | None = None
     result: dict[str, Any] | None = None
 
 

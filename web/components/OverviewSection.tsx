@@ -11,15 +11,26 @@ import {
   YAxis,
 } from "recharts";
 
-import { formatInr, formatInrSigned, getOverview, type Overview } from "@/lib/api";
+import { formatHeadline, formatInr, getOverview, runRecoveryBatch, type Overview } from "@/lib/api";
 import { Empty, Loading } from "./State";
 
 export default function OverviewSection() {
   const [data, setData] = useState<Overview | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     getOverview().then(setData);
   }, []);
+
+  async function handleRunBatch() {
+    setBusy(true);
+    try {
+      await runRecoveryBatch();
+      setData(await getOverview());
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (!data) return <Loading label="Loading overview" />;
   if (data.total_cases === 0) return <Empty label="No data yet — run a simulation or ingest events." />;
@@ -38,19 +49,33 @@ export default function OverviewSection() {
       <div className="rounded-card border border-line bg-ink-900 p-6 shadow-card">
         <div className="flex items-center justify-between">
           <p className="font-mono text-eyebrow uppercase text-fg-muted">
-            Recovered vs baseline
+            Incremental vs baseline · measured from executed outcomes
           </p>
           <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-gold">
             <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-gold" />
-            Live
+            Measured
           </span>
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-x-4 gap-y-2">
-          <span className="money text-hero text-gold">{formatInrSigned(72_200_000)}</span>
-          <span className="pb-2 font-display text-xl font-semibold text-fg">
-            incremental revenue
+          <span className="money text-hero text-gold">
+            {data.incremental_paise !== null && data.incremental_paise !== undefined
+              ? formatHeadline(data.incremental_paise)
+              : "No executed batch yet"}
           </span>
+          {data.incremental_paise === null || data.incremental_paise === undefined ? (
+            <span className="pb-2 font-display text-sm text-fg-muted">
+              Run a recovery batch to measure real recovered revenue.
+            </span>
+          ) : null}
         </div>
+
+        <button
+          onClick={handleRunBatch}
+          disabled={busy}
+          className="mt-4 rounded-card border border-gold/40 bg-gold/10 px-4 py-2 font-mono text-xs font-semibold uppercase tracking-widest text-gold transition-colors hover:bg-gold/20 disabled:opacity-50"
+        >
+          {busy ? "Running recovery batch…" : "Run recovery batch"}
+        </button>
 
         {/* ratio bar: recovered vs at-risk */}
         <div className="mt-5">

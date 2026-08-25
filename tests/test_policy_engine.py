@@ -13,6 +13,7 @@ from db.models import (
     Merchant,
     RecoveryCase,
     RecoveryCaseStatus,
+    RecoveryMemory,
     RecoveryOutcome,
 )
 from engine.decision_engine import Decision
@@ -138,6 +139,7 @@ def _make_case(amount_paise: int) -> tuple[RecoveryCase, str, str]:
 
 def _cleanup(session, case_id: str, merchant_id: str, customer_id: str) -> None:
     session.query(RecoveryOutcome).filter_by(case_id=case_id).delete()
+    session.query(RecoveryMemory).filter_by(customer_id=customer_id).delete()
     case = session.get(RecoveryCase, case_id)
     if case:
         session.delete(case)

@@ -8,6 +8,8 @@ export const mockOverview: Overview = {
   recovery_rate: 0.286,
   total_cases: 20000,
   recovered_cases: 5720,
+  executed_at_risk_paise: 48200000,
+  incremental_paise: 72200000,
 };
 
 export const mockCases: CaseSummary[] = [

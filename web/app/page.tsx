@@ -3,17 +3,29 @@
 import { useState } from "react";
 
 import AgentActivitySection from "@/components/AgentActivitySection";
+import ArchitectureSection from "@/components/ArchitectureSection";
 import CaseDrillDown from "@/components/CaseDrillDown";
+import HowItWorksSection from "@/components/HowItWorksSection";
 import OverviewSection from "@/components/OverviewSection";
 import RazorpaySection from "@/components/RazorpaySection";
 import RecoveryQueueSection from "@/components/RecoveryQueueSection";
 import SimulationSection from "@/components/SimulationSection";
 import StrategyPerformanceSection from "@/components/StrategyPerformanceSection";
 
-type Tab = "overview" | "queue" | "activity" | "strategies" | "simulation" | "razorpay";
+type Tab =
+  | "how"
+  | "overview"
+  | "architecture"
+  | "queue"
+  | "activity"
+  | "strategies"
+  | "simulation"
+  | "razorpay";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: "how", label: "How it works", icon: "◎" },
   { id: "overview", label: "Overview", icon: "◈" },
+  { id: "architecture", label: "Architecture", icon: "⬡" },
   { id: "queue", label: "Recovery Queue", icon: "▤" },
   { id: "razorpay", label: "Razorpay", icon: "⛁" },
   { id: "activity", label: "Agent Activity", icon: "◌" },
@@ -22,7 +34,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ];
 
 export default function Home() {
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>("how");
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
 
   return (
@@ -65,7 +77,9 @@ export default function Home() {
       {/* Content */}
       <main className="min-w-0 flex-1 p-4 md:p-6">
         <div>
+          {tab === "how" && <HowItWorksSection />}
           {tab === "overview" && <OverviewSection />}
+          {tab === "architecture" && <ArchitectureSection />}
           {tab === "queue" && <RecoveryQueueSection onSelect={setSelectedCase} />}
           {tab === "razorpay" && <RazorpaySection />}
           {tab === "activity" && <AgentActivitySection caseId={selectedCase || "case-1"} />}

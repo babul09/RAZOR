@@ -15,9 +15,20 @@ from db.models import RecoveryAction, RecoveryCase, RecoveryCaseStatus, Recovery
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
+# Naive, untargeted baseline recovery rate used to measure incremental value
+# from executed outcomes (matches engine.recovery_batch.BASELINE_RECOVERY_RATE).
+BASELINE_RECOVERY_RATE = 0.15
+
 _cache = redis.Redis.from_url(settings.redis_url)
 OVERVIEW_KEY = "razor:analytics:overview"
 CACHE_TTL = 30  # seconds
+
+
+def invalidate_overview_cache() -> None:
+    try:
+        _cache.delete(OVERVIEW_KEY)
+    except Exception:
+        pass
 
 
 def _cache_get(key: str):
@@ -51,6 +62,19 @@ def overview(db: Session = Depends(get_db)) -> AnalyticsOverview:
         .filter(RecoveryCase.status == RecoveryCaseStatus.RECOVERED.value)
         .count()
     )
+    # Measured-real-batch: baseline and incremental are computed over the same
+    # set of cases that actually reached an executed outcome, so the headline
+    # traces to executed recovery money, not the standalone simulation.
+    executed_at_risk = int(
+        db.query(func.coalesce(func.sum(RecoveryCase.amount_at_risk_paise), 0))
+        .join(RecoveryOutcome, RecoveryOutcome.case_id == RecoveryCase.id)
+        .scalar()
+        or 0
+    )
+    baseline_paise = int(executed_at_risk * BASELINE_RECOVERY_RATE)
+    incremental = (
+        int(recovered) - baseline_paise if executed_at_risk > 0 else None
+    )
     recovery_rate = recovered / at_risk if at_risk else 0.0
     data = {
         "revenue_at_risk_paise": int(at_risk),
@@ -58,6 +82,8 @@ def overview(db: Session = Depends(get_db)) -> AnalyticsOverview:
         "recovery_rate": float(recovery_rate),
         "total_cases": int(total_cases),
         "recovered_cases": int(recovered_cases),
+        "executed_at_risk_paise": int(executed_at_risk),
+        "incremental_paise": incremental,
     }
     _cache_set(OVERVIEW_KEY, data)
     return AnalyticsOverview(**data)

@@ -61,11 +61,15 @@ class DecisionEngine:
         wait_window: tuple[int | None, int | None] = (19, 22),
         session_factory: Callable = SessionLocal,
         strategy_weights: dict[str, float] | None = None,
+        session=None,
     ):
         self.model = model
         self.state_machine = state_machine or RecoveryStateMachine()
         self.wait_window = wait_window
         self.session_factory = session_factory
+        # Optional caller-owned session to persist into (batches avoid per-case
+        # connection churn). When None, each decision opens its own session.
+        self.session = session
         # FR-12: experiment-derived weights scale EV; default neutral 1.0.
         self.strategy_weights = dict(strategy_weights or {})
 
@@ -254,30 +258,36 @@ class DecisionEngine:
         evaluated: list[EvaluatedStrategy],
     ) -> None:
         evaluated_json = {r.strategy: r.expected_net_paise for r in evaluated}
+        if self.session is not None:
+            self._persist_into(self.session, case_id, decision, features, evaluated_json)
+            return
         with self.session_factory() as session:
-            persistent = session.get(RecoveryCase, case_id)
-            persistent.status = self._advance_status(persistent.status, decision)
-            session.add(
-                AgentDecision(
-                    case_id=persistent.id,
-                    input_json=self._jsonable(dict(features)),
-                    strategies_evaluated_json=self._jsonable(evaluated_json),
-                    selected_strategy=decision.selected_strategy,
-                    reasoning=decision.reasoning,
-                    policy_check_passed=decision.policy_check_passed,
-                )
-            )
-            session.add(
-                AuditLog(
-                    case_id=persistent.id,
-                    event_type="DECISION",
-                    details_json={
-                        "selected_strategy": decision.selected_strategy,
-                        "candidate_strategy": decision.candidate_strategy,
-                        "expected_net_paise": decision.expected_net_recovery_paise,
-                        "reasoning": decision.reasoning,
-                        "recommended_at": decision.recommended_at.isoformat() if decision.recommended_at else None,
-                    },
-                )
-            )
+            self._persist_into(session, case_id, decision, features, evaluated_json)
             session.commit()
+
+    def _persist_into(self, session, case_id, decision, features, evaluated_json) -> None:
+        persistent = session.get(RecoveryCase, case_id)
+        persistent.status = self._advance_status(persistent.status, decision)
+        session.add(
+            AgentDecision(
+                case_id=persistent.id,
+                input_json=self._jsonable(dict(features)),
+                strategies_evaluated_json=self._jsonable(evaluated_json),
+                selected_strategy=decision.selected_strategy,
+                reasoning=decision.reasoning,
+                policy_check_passed=decision.policy_check_passed,
+            )
+        )
+        session.add(
+            AuditLog(
+                case_id=persistent.id,
+                event_type="DECISION",
+                details_json={
+                    "selected_strategy": decision.selected_strategy,
+                    "candidate_strategy": decision.candidate_strategy,
+                    "expected_net_paise": decision.expected_net_recovery_paise,
+                    "reasoning": decision.reasoning,
+                    "recommended_at": decision.recommended_at.isoformat() if decision.recommended_at else None,
+                },
+            )
+        )

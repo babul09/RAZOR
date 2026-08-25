@@ -38,6 +38,29 @@ export interface Overview {
   recovery_rate: number;
   total_cases: number;
   recovered_cases: number;
+  executed_at_risk_paise: number;
+  incremental_paise: number | null;
+}
+
+export interface BatchSourceMetric {
+  source_type: string;
+  processed: number;
+  attempts: number;
+  recoveries: number;
+  at_risk_paise: number;
+  recovered_paise: number;
+  cost_paise: number;
+}
+
+export interface RecoveryBatchReport {
+  processed_cases: number;
+  executed: number;
+  recoveries: number;
+  at_risk_paise: number;
+  recovered_paise: number;
+  cost_paise: number;
+  incremental_paise: number;
+  per_source: BatchSourceMetric[];
 }
 
 export interface StrategyMetric {
@@ -49,7 +72,12 @@ export interface StrategyMetric {
 }
 
 export interface SimulationStatus {
-  status: string;
+  status: string; // queued | running | succeeded | failed
+  stage: string | null;
+  completed: number | null;
+  total: number | null;
+  execution_mode: string | null;
+  error: string | null;
   result: Record<string, unknown> | null;
 }
 
@@ -120,6 +148,33 @@ export function getOverview(): Promise<Overview> {
   return getJson("/api/analytics/overview", mockOverview);
 }
 
+/** Run a recovery batch over revenue-at-risk cases, returning measured money. */
+export async function runRecoveryBatch(
+  sourceTypes?: string[]
+): Promise<RecoveryBatchReport> {
+  const empty: RecoveryBatchReport = {
+    processed_cases: 0,
+    executed: 0,
+    recoveries: 0,
+    at_risk_paise: 0,
+    recovered_paise: 0,
+    cost_paise: 0,
+    incremental_paise: 0,
+    per_source: [],
+  };
+  try {
+    const res = await fetch(`${API_URL}/api/recovery/batch/run`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_types: sourceTypes ?? null, limit: 200 }),
+    });
+    if (!res.ok) throw new Error("recovery batch run failed");
+    return await res.json();
+  } catch {
+    return empty;
+  }
+}
+
 export function getCases(): Promise<CaseSummary[]> {
   return getJson<{ items: CaseSummary[] }>("/api/recovery/cases?page=1&page_size=50", {
     items: mockCases,
@@ -153,7 +208,12 @@ export async function runSimulation(
 
 export function getSimulationStatus(jobId: string): Promise<SimulationStatus> {
   const fallback: SimulationStatus = {
-    status: "SUCCESS",
+    status: "succeeded",
+    stage: "complete",
+    completed: 4,
+    total: 4,
+    execution_mode: "inline-process",
+    error: null,
     result: {
       incremental_paise: 722000,
       baseline: { total_recovered_paise: 740000 },
@@ -233,4 +293,19 @@ export function formatInrSigned(paise: number): string {
     body = `₹${Math.round(Math.abs(rupees)).toLocaleString("en-IN")}`;
   }
   return `${sign}${body}`;
+}
+
+/** Signed incremental-revenue headline, or an explicit unavailable state. */
+export function formatHeadline(incrementalPaise: number | null): string {
+  if (incrementalPaise === null || incrementalPaise === undefined)
+    return "comparison unavailable";
+  const rupees = incrementalPaise / 100;
+  const sign = rupees >= 0 ? "+" : "−";
+  let body: string;
+  if (Math.abs(rupees) >= 100000) {
+    body = `₹${(Math.abs(rupees) / 100000).toFixed(2)}L`;
+  } else {
+    body = `₹${Math.round(Math.abs(rupees)).toLocaleString("en-IN")}`;
+  }
+  return `${sign}${body} incremental revenue`;
 }

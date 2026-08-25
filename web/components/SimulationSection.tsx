@@ -7,6 +7,7 @@ import {
   formatInrSigned,
   getSimulationStatus,
   runSimulation,
+  type SimulationStatus,
 } from "@/lib/api";
 
 interface SimBaseline {
@@ -36,6 +37,45 @@ interface SimulationResult {
   razor: SimRazor;
 }
 
+const STAGES = [
+  { key: "generating", label: "Generating synthetic events" },
+  { key: "baseline", label: "Running baseline recovery" },
+  { key: "razor", label: "Running RAZOR policy pipeline" },
+  { key: "complete", label: "Complete" },
+];
+
+function ProgressBar({
+  label,
+  pct,
+  active,
+  done,
+}: {
+  label: string;
+  pct: number;
+  active: boolean;
+  done: boolean;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between font-mono text-xs text-fg-muted">
+        <span className={active ? "text-gold" : done ? "text-mint" : "text-fg-muted"}>
+          {active ? "▸ " : done ? "✓ " : "○ "}
+          {label}
+        </span>
+        <span className="text-fg-muted/70">{Math.round(pct)}%</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-ink-800">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${
+            done ? "bg-mint" : active ? "bg-gold" : "bg-ink-700"
+          }`}
+          style={{ width: `${Math.max(2, pct)}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function Bar({ label, paise, max, accent }: {
   label: string;
   paise: number;
@@ -62,6 +102,7 @@ function Bar({ label, paise, max, accent }: {
 export default function SimulationSection() {
   const [n, setN] = useState(10000);
   const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState<SimulationStatus | null>(null);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,14 +110,22 @@ export default function SimulationSection() {
     setRunning(true);
     setError(null);
     setResult(null);
+    setStatus(null);
     try {
       const { job_id } = await runSimulation(n);
-      // Synchronous fallback returns a result on the very first poll.
-      const s = await getSimulationStatus(job_id);
-      if (s.status === "SUCCESS" && s.result) {
-        setResult(s.result as unknown as SimulationResult);
-      } else {
-        setError("Simulation did not return a result.");
+      // Poll until a terminal state, tracking live stage progress.
+      for (;;) {
+        const s = await getSimulationStatus(job_id);
+        setStatus(s);
+        if (s.status === "succeeded") {
+          setResult(s.result as unknown as SimulationResult);
+          break;
+        }
+        if (s.status === "failed") {
+          setError(s.error || "Simulation failed");
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 500));
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Simulation failed");
@@ -84,6 +133,14 @@ export default function SimulationSection() {
       setRunning(false);
     }
   }
+
+  const stageIndex = status ? STAGES.findIndex((s) => s.key === status.stage) : -1;
+  const pct =
+    status && status.total
+      ? ((status.completed ?? 0) / status.total) * 100
+      : running
+        ? 5
+        : 0;
 
   const rows = result
     ? [
@@ -127,14 +184,39 @@ export default function SimulationSection() {
         >
           {running ? "Running…" : "Run recovery simulation"}
         </button>
-        {running && (
-          <span className="animate-pulse-soft font-mono text-sm text-fg-muted">
-            projecting pipeline…
-          </span>
-        )}
       </div>
 
       {error && <p className="font-mono text-sm text-rose">{error}</p>}
+
+      {/* Live stage progress while the simulation runs. */}
+      {running && (
+        <div className="rounded-card border border-gold/30 bg-ink-900 p-5 shadow-card">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="font-mono text-eyebrow uppercase text-fg-muted">
+              Running simulation
+            </p>
+            <span className="animate-pulse-soft font-mono text-xs uppercase tracking-widest text-gold">
+              live
+            </span>
+          </div>
+          <div className="space-y-4">
+            {STAGES.map((s, i) => (
+              <ProgressBar
+                key={s.key}
+                label={s.label}
+                pct={i < stageIndex ? 100 : i === stageIndex ? pct : 0}
+                active={i === stageIndex}
+                done={i < stageIndex || (status?.status === "succeeded" && i <= stageIndex)}
+              />
+            ))}
+          </div>
+          {status?.stage && stageIndex >= 0 && (
+            <p className="mt-4 font-mono text-sm text-fg">
+              {STAGES[stageIndex].label}…
+            </p>
+          )}
+        </div>
+      )}
 
       {result && (
         <>
