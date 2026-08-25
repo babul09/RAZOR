@@ -18,6 +18,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Always operate from the repo root so .env / relative config resolve no matter
+# where the script is invoked from.
+cd "$ROOT"
 DEV_DIR="$ROOT/scripts/.dev"
 mkdir -p "$DEV_DIR"
 
@@ -51,8 +54,11 @@ check_prereqs() {
   if ! (command -v redis-cli >/dev/null 2>&1 && timeout 2 redis-cli ping >/dev/null 2>&1); then
     warn "Redis is not running — I'll try to start it."
   fi
-  if ! "$VENV_PY" -c "from sqlalchemy import text; from db.database import SessionLocal; s=SessionLocal(); s.execute(text('SELECT 1')); s.close()" >/dev/null 2>&1; then
-    err "PostgreSQL unreachable via DATABASE_URL. Check your network / DB service."
+  if ! "$VENV_PY" -c "from sqlalchemy import text; from db.database import SessionLocal; s=SessionLocal(); s.execute(text('SELECT 1')); s.close()" 2>"$DEV_DIR/dbcheck.err" >/dev/null; then
+    err "PostgreSQL unreachable via DATABASE_URL."
+    warn "resolved host: $("$VENV_PY" -c 'from config import settings; print(settings.database_url.split("@")[-1])' 2>/dev/null || echo "unknown")"
+    warn "underlying error (last line):"
+    tail -1 "$DEV_DIR/dbcheck.err" | sed 's/^/    /'
     return 1
   fi
   ok "prerequisites satisfied"
