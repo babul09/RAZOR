@@ -46,3 +46,5 @@ target/
 .DS_Store
 Thumbs.db
 ```
+# Runtime dev-process state (scripts/dev.sh)
+scripts/.dev/
