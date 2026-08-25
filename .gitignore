@@ -1,38 +1,48 @@
-# Python
+```
+# Compiled Python files
+*.pyc
 __pycache__/
-*.py[cod]
-*.egg-info/
-.eggs/
-dist/
-build/
+
+# Dependencies
 .venv/
 venv/
-*.egg
-
-# Environment
-.env
-!.env.example
-
-# Generated simulation data (too large for git)
-simulation/data/
-!simulation/data/.gitkeep
-
-# ML models
-ml/models/*.joblib
-ml/models/*.pkl
-
-# Node / Next.js dashboard
 node_modules/
-web/node_modules/
-web/.next/
-web/out/
-npm-debug.log*
 
-# IDE
-.idea/
-.vscode/
+# Logs and temporary files
+*.log
+*.tmp
 *.swp
 
-# OS
+# Environment files
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# Build artifacts
+dist/
+build/
+target/
+*.class
+*.o
+*.obj
+*.out
+
+# MyPy cache
+.mypy_cache/
+
+# Pytest cache
+.pytest_cache/
+
+# System files
 .DS_Store
 Thumbs.db
+```
