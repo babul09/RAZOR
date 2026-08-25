@@ -8,12 +8,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
+from agents.diagnosis_agent import DiagnosisAgent
+from agents.explanation_agent import ExplanationAgent
 from api.schemas import CaseDetail, CaseSummary, PaginatedCases, TimelineEntry
 from db.database import get_db
-from db.models import AgentDecision, AuditLog, RecoveryCase
+from db.models import AgentDecision, AuditLog, Customer, CustomerRecoveryProfile, RecoveryCase
 
 router = APIRouter(prefix="/api/recovery", tags=["recovery"])
-
 
 def _summary(case: RecoveryCase) -> CaseSummary:
     return CaseSummary(
@@ -129,3 +130,73 @@ def recovery_events(db: Session = Depends(get_db)) -> StreamingResponse:
             await asyncio.sleep(3)
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+class _Decision:
+    """Minimal decision view for the explanation agent."""
+
+    def __init__(self, selected_strategy: str | None, reasoning: str):
+        self.selected_strategy = selected_strategy
+        self.reasoning = reasoning
+
+
+class _Diagnosis:
+    """Minimal diagnosis view for the explanation agent."""
+
+    def __init__(self, diagnosis: str):
+        self.diagnosis = diagnosis
+
+
+@router.post("/cases/{case_id}/explain")
+def explain_case(case_id: str, db: Session = Depends(get_db)) -> dict:
+    """Ensure a diagnosis exists and produce (or refresh) a Gemini explanation.
+
+    Uses Gemini-flash when configured, else a deterministic fallback. Persists
+    the explanation as an EXPLANATION audit entry so the timeline keeps it.
+    """
+    case = db.get(RecoveryCase, case_id)
+    if case is None:
+        raise HTTPException(status_code=404, detail="case not found")
+
+    customer = db.get(Customer, case.customer_id) if case.customer_id else None
+    profile = (
+        db.query(CustomerRecoveryProfile)
+        .filter_by(customer_id=case.customer_id)
+        .first()
+    )
+
+    # Ensure a diagnosis exists.
+    diag_audit = (
+        db.query(AuditLog)
+        .filter_by(case_id=case_id, event_type="DIAGNOSIS")
+        .order_by(AuditLog.created_at.desc())
+        .first()
+    )
+    if diag_audit and diag_audit.details_json:
+        diagnosis = dict(diag_audit.details_json)
+    else:
+        diagnosis = DiagnosisAgent().diagnose(case, customer=customer, profile=profile).to_dict()
+        db.add(
+            AuditLog(case_id=case_id, event_type="DIAGNOSIS", details_json=diagnosis)
+        )
+        db.commit()
+
+    decision_row = (
+        db.query(AgentDecision)
+        .filter_by(case_id=case_id)
+        .order_by(AgentDecision.created_at.desc())
+        .first()
+    )
+    if decision_row is None:
+        explanation = "This case has not been decided yet, so there is nothing to explain."
+    else:
+        explanation = ExplanationAgent().explain(
+            _Decision(decision_row.selected_strategy, decision_row.reasoning or ""),
+            _Diagnosis(diagnosis.get("diagnosis", "no diagnosis")),
+        )
+
+    db.add(
+        AuditLog(case_id=case_id, event_type="EXPLANATION", details_json={"explanation": explanation})
+    )
+    db.commit()
+    return {"diagnosis": diagnosis, "explanation": explanation}

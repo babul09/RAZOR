@@ -138,10 +138,12 @@ class RecoveryBatchExecutor:
         session,
         case: RecoveryCase,
         customer: Customer | None,
+        profile: CustomerRecoveryProfile | None,
         strategy: str,
     ) -> RecoveryOutcome:
         """Execute one action, record the outcome + learning tuple, update status."""
-        from db.models import RecoveryMemory
+        from db.models import AuditLog, RecoveryMemory
+        from agents.diagnosis_agent import DiagnosisAgent
 
         segment = customer.customer_segment if customer and customer.customer_segment else "default"
         result = self.executor.attempt_recovery(segment, strategy, case.amount_at_risk_paise)
@@ -182,6 +184,54 @@ class RecoveryBatchExecutor:
                 amount_paise=result.revenue_recovered_paise,
             )
         )
+
+        # Tell the story so the lab's step player + Gemini panel have content:
+        # diagnosis (rule-based here, Gemini upgrades on demand), outcome, and a
+        # plain-language explanation.
+        if not session.query(AuditLog).filter_by(case_id=case.id, event_type="DIAGNOSIS").count():
+            diagnosis = DiagnosisAgent(client=None).diagnose(case, customer=customer, profile=profile)
+            session.add(
+                AuditLog(
+                    case_id=case.id,
+                    event_type="DIAGNOSIS",
+                    details_json=diagnosis.to_dict(),
+                )
+            )
+        session.add(
+            AuditLog(
+                case_id=case.id,
+                event_type="OUTCOME",
+                details_json={
+                    "strategy": strategy,
+                    "recovered": bool(result.recovered),
+                    "revenue_recovered_paise": result.revenue_recovered_paise,
+                    "cost_paise": result.cost_paise,
+                    "net_paise": result.net_revenue_recovered_paise,
+                    "status": "RECOVERED" if result.recovered else "FAILED",
+                },
+            )
+        )
+        if not session.query(AuditLog).filter_by(case_id=case.id, event_type="EXPLANATION").count():
+            diag_text = "Payment failed and required recovery."
+            existing_diag = (
+                session.query(AuditLog)
+                .filter_by(case_id=case.id, event_type="DIAGNOSIS")
+                .first()
+            )
+            if existing_diag and existing_diag.details_json:
+                diag_text = existing_diag.details_json.get("diagnosis", diag_text)
+            session.add(
+                AuditLog(
+                    case_id=case.id,
+                    event_type="EXPLANATION",
+                    details_json={
+                        "explanation": (
+                            f"Selected {strategy} for this case. Diagnosis: {diag_text}. "
+                            f"Outcome: {'recovered' if result.recovered else 'not recovered'}."
+                        )
+                    },
+                )
+            )
         return outcome
 
     # ------------------------------------------------------------------
@@ -283,7 +333,7 @@ class RecoveryBatchExecutor:
             except ValueError:
                 pass
 
-        outcome = self._execute_case(session, case, customer, strategy)
+        outcome = self._execute_case(session, case, customer, profile, strategy)
         # Capture values before commit expires + expunge_all detaches them.
         amount = case.amount_at_risk_paise
         recovered = outcome.revenue_recovered_paise

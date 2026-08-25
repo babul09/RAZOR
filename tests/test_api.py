@@ -192,11 +192,14 @@ def test_ingest_payment_failed_creates_case(_client):
         assert r2.json()["ingested"] is False
     finally:
         session = SessionLocal()
-        from db.models import Payment
+        from db.models import AgentDecision, AuditLog, Payment, RecoveryMemory
 
         case = session.query(RecoveryCase).filter_by(source_id=event_id).first()
         if case:
             session.query(RecoveryOutcome).filter_by(case_id=case.id).delete()
+            for m in (AgentDecision, AuditLog, RecoveryMemory):
+                if hasattr(m, "case_id"):
+                    session.query(m).filter_by(case_id=case.id).delete()
             session.delete(case)
         payment = session.get(Payment, event_id)
         if payment:

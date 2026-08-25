@@ -197,6 +197,28 @@ export function getCaseDetail(id: string): Promise<CaseDetail> {
   return getJson(`/api/recovery/cases/${id}`, fallback);
 }
 
+export interface CaseExplanation {
+  diagnosis: Record<string, unknown>;
+  explanation: string;
+}
+
+/** Generate/refresh a Gemini (or fallback) explanation for a case. */
+export async function explainCase(caseId: string): Promise<CaseExplanation> {
+  const empty: CaseExplanation = {
+    diagnosis: {},
+    explanation: "Could not generate an explanation right now.",
+  };
+  try {
+    const res = await fetch(`${API_URL}/api/recovery/cases/${caseId}/explain`, {
+      method: "POST",
+    });
+    if (!res.ok) throw new Error("explain failed");
+    return await res.json();
+  } catch {
+    return empty;
+  }
+}
+
 export async function runSimulation(
   n: number
 ): Promise<{ job_id: string }> {

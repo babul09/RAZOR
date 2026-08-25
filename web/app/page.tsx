@@ -2,51 +2,40 @@
 
 import { useState } from "react";
 
-import AgentActivitySection from "@/components/AgentActivitySection";
-import ArchitectureSection from "@/components/ArchitectureSection";
 import CaseDrillDown from "@/components/CaseDrillDown";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import OverviewSection from "@/components/OverviewSection";
 import RazorpaySection from "@/components/RazorpaySection";
+import RecoveryLabSection from "@/components/RecoveryLabSection";
 import RecoveryQueueSection from "@/components/RecoveryQueueSection";
 import SimulationSection from "@/components/SimulationSection";
 import StatusStrip from "@/components/StatusStrip";
 import StrategyPerformanceSection from "@/components/StrategyPerformanceSection";
 
-type Tab =
-  | "how"
-  | "overview"
-  | "architecture"
-  | "queue"
-  | "activity"
-  | "strategies"
-  | "simulation"
-  | "razorpay";
+type Tab = "lab" | "how" | "overview" | "queue" | "strategies" | "simulation" | "razorpay";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: "lab", label: "Recovery Lab", icon: "◉" },
   { id: "how", label: "How it works", icon: "◎" },
   { id: "overview", label: "Overview", icon: "◈" },
-  { id: "architecture", label: "Architecture", icon: "⬡" },
   { id: "queue", label: "Recovery Queue", icon: "▤" },
   { id: "razorpay", label: "Razorpay", icon: "⛁" },
-  { id: "activity", label: "Agent Activity", icon: "◌" },
   { id: "strategies", label: "Strategy", icon: "≋" },
   { id: "simulation", label: "Simulation", icon: "▶" },
 ];
 
 const TITLES: Record<Tab, { title: string; sub: string }> = {
+  lab: { title: "Recovery Lab", sub: "Watch a case move through the pipeline, step by step" },
   how: { title: "How it works", sub: "What RAZOR does and why it works" },
   overview: { title: "Overview", sub: "Measured recovery across every event type" },
-  architecture: { title: "Live architecture", sub: "The recovery pipeline in real time" },
   queue: { title: "Recovery queue", sub: "Every revenue-at-risk case, prioritized" },
   razorpay: { title: "Razorpay live", sub: "Real failed payments · side-by-side recovery" },
-  activity: { title: "Agent activity", sub: "Decision timeline and reasoning per case" },
   strategies: { title: "Strategy", sub: "What recovers money and what it costs" },
   simulation: { title: "Simulation", sub: "Project recovery across a synthetic batch" },
 };
 
 export default function Home() {
-  const [tab, setTab] = useState<Tab>("how");
+  const [tab, setTab] = useState<Tab>("lab");
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
   const meta = TITLES[tab];
 
@@ -105,12 +94,11 @@ export default function Home() {
 
           <StatusStrip />
 
+          {tab === "lab" && <RecoveryLabSection />}
           {tab === "how" && <HowItWorksSection />}
           {tab === "overview" && <OverviewSection />}
-          {tab === "architecture" && <ArchitectureSection />}
           {tab === "queue" && <RecoveryQueueSection onSelect={setSelectedCase} />}
           {tab === "razorpay" && <RazorpaySection />}
-          {tab === "activity" && <AgentActivitySection caseId={selectedCase || "case-1"} />}
           {tab === "strategies" && <StrategyPerformanceSection />}
           {tab === "simulation" && <SimulationSection />}
         </div>
