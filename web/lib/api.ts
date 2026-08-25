@@ -230,6 +230,32 @@ export function rejectCase(caseId: string): Promise<ActionResult> {
   return writeJson<ActionResult>("POST", `/api/recovery/cases/${caseId}/reject`);
 }
 
+// --- Customer search ---
+
+export interface CustomerCaseHit {
+  id: string;
+  amount_at_risk_paise: number;
+  failure_code: string | null;
+  status: string | null;
+}
+
+export interface CustomerSearchHit {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  lifetime_value_paise: number;
+  segment: string | null;
+  total_cases: number;
+  at_risk_paise: number;
+  recovered_paise: number;
+  cases: CustomerCaseHit[];
+}
+
+export function searchCustomers(q: string): Promise<CustomerSearchHit[]> {
+  return getJson(`/api/customers?q=${encodeURIComponent(q)}`, []);
+}
+
 /** Run a recovery batch over revenue-at-risk cases, returning measured money. */
 export async function runRecoveryBatch(
   sourceTypes?: string[]

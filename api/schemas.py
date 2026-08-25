@@ -272,3 +272,23 @@ class ActionResult(BaseModel):
     recovered_paise: int = 0
     cost_paise: int = 0
 
+
+class CustomerCaseHit(BaseModel):
+    id: str
+    amount_at_risk_paise: int
+    failure_code: str | None = None
+    status: str | None = None
+
+
+class CustomerSearchHit(BaseModel):
+    id: str
+    name: str
+    email: str | None = None
+    phone: str | None = None
+    lifetime_value_paise: int = 0
+    segment: str | None = None
+    total_cases: int = 0
+    at_risk_paise: int = 0
+    recovered_paise: int = 0
+    cases: list[CustomerCaseHit] = []
+

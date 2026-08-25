@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import CaseDrillDown from "@/components/CaseDrillDown";
+import CustomersSection from "@/components/CustomersSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import OperatorSection from "@/components/OperatorSection";
 import OverviewSection from "@/components/OverviewSection";
@@ -13,7 +14,7 @@ import SimulationSection from "@/components/SimulationSection";
 import StatusStrip from "@/components/StatusStrip";
 import StrategyPerformanceSection from "@/components/StrategyPerformanceSection";
 
-type Tab = "lab" | "how" | "overview" | "queue" | "operator" | "strategies" | "simulation" | "razorpay";
+type Tab = "lab" | "how" | "overview" | "queue" | "operator" | "customers" | "strategies" | "simulation" | "razorpay";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "lab", label: "Recovery Lab", icon: "◉" },
@@ -21,6 +22,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "◈" },
   { id: "queue", label: "Recovery Queue", icon: "▤" },
   { id: "operator", label: "Operator", icon: "⚙" },
+  { id: "customers", label: "Customers", icon: "◍" },
   { id: "razorpay", label: "Razorpay", icon: "⛁" },
   { id: "strategies", label: "Strategy", icon: "≋" },
   { id: "simulation", label: "Simulation", icon: "▶" },
@@ -32,6 +34,7 @@ const TITLES: Record<Tab, { title: string; sub: string }> = {
   overview: { title: "Overview", sub: "Measured recovery across every event type" },
   queue: { title: "Recovery queue", sub: "Every revenue-at-risk case, prioritized" },
   operator: { title: "Operator", sub: "Payment limits, approvals, and manual actions" },
+  customers: { title: "Customers", sub: "Search users and their recovery history" },
   razorpay: { title: "Razorpay live", sub: "Real failed payments · side-by-side recovery" },
   strategies: { title: "Strategy", sub: "What recovers money and what it costs" },
   simulation: { title: "Simulation", sub: "Project recovery across a synthetic batch" },
@@ -102,6 +105,7 @@ export default function Home() {
           {tab === "overview" && <OverviewSection />}
           {tab === "queue" && <RecoveryQueueSection onSelect={setSelectedCase} />}
           {tab === "operator" && <OperatorSection />}
+          {tab === "customers" && <CustomersSection />}
           {tab === "razorpay" && <RazorpaySection />}
           {tab === "strategies" && <StrategyPerformanceSection />}
           {tab === "simulation" && <SimulationSection />}
