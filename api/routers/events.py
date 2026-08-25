@@ -1,4 +1,14 @@
-"""Idempotent event ingestion webhook (FR-01) + revenue risk scoring (FR-02)."""
+"""Idempotent event ingestion webhook (FR-01) + revenue risk scoring (FR-02).
+
+Supports all FR-01 event types. Creates recovery cases for revenue-at-risk
+events: payment.failed, checkout.abandoned, subscription.failed, invoice.overdue.
+Non-revenue events (payment.success, refund.created, dispute.created) are logged
+but do not create cases.
+
+Note: Other event types beyond REVENUE_RISK_EVENTS are intentionally unwired
+from the recovery flow per design - they are accepted for logging/auditing but
+do not trigger automated recovery actions.
+"""
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
@@ -33,6 +43,15 @@ SUPPORTED_EVENT_TYPES = {
     "dispute.created",
 }
 
+# Event types that create revenue-at-risk recovery cases.
+# These are wired to the full recovery flow (diagnosis → decision → execution).
+REVENUE_RISK_EVENTS = {
+    "payment.failed",
+    "checkout.abandoned",
+    "subscription.failed",
+    "invoice.overdue",
+}
+
 DEFAULT_RECOVERY_PROBABILITY = 0.4
 
 
@@ -62,6 +81,10 @@ def ingest(payload: EventIngestRequest, db: Session = Depends(get_db)) -> EventI
         else DEFAULT_RECOVERY_PROBABILITY
     )
 
+    # Determine payment status based on event type.
+    is_failed_event = payload.event_type in {"payment.failed", "checkout.abandoned", "subscription.failed"}
+    payment_status = "FAILED" if is_failed_event else "SUCCESS"
+
     payment = Payment(
         id=payload.event_id,
         merchant_id=payload.merchant_id,
@@ -69,14 +92,15 @@ def ingest(payload: EventIngestRequest, db: Session = Depends(get_db)) -> EventI
         amount_paise=payload.amount_paise,
         currency="INR",
         payment_method=payload.payment_method,
-        status="FAILED" if payload.event_type == "payment.failed" else "SUCCESS",
+        status=payment_status,
         failure_code=payload.failure_code,
         failure_reason=payload.failure_code,
     )
     db.add(payment)
 
     recovery_case_id = None
-    if payload.event_type == "payment.failed":
+    # Create recovery case for revenue-at-risk events.
+    if payload.event_type in REVENUE_RISK_EVENTS:
         severity = build_severity(payload.failure_code)
         value_factor = customer_value_factor(
             customer.lifetime_value_paise if customer else None
@@ -90,7 +114,7 @@ def ingest(payload: EventIngestRequest, db: Session = Depends(get_db)) -> EventI
         case = RecoveryCase(
             merchant_id=payload.merchant_id,
             customer_id=payload.customer_id,
-            source_type="payment",
+            source_type=payload.event_type.split(".")[0],  # e.g., "payment", "checkout"
             source_id=payload.event_id,
             amount_at_risk_paise=payload.amount_paise,
             failure_code=payload.failure_code,
