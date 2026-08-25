@@ -231,3 +231,44 @@ class RazorpayComparison(BaseModel):
     razor: RazorpaySimSide
     incremental_paise: int
 
+
+# --- Operator console (Phase 9) ---
+
+
+class PolicyView(BaseModel):
+    merchant_id: str
+    max_discount_percent: int = 10
+    max_automated_amount_paise: int = 500_000
+    max_contacts_count: int = 3
+    max_contacts_window_days: int = 7
+    require_human_approval_above_paise: int = 500_000
+    allowed_channels: list[str] = ["whatsapp", "email"]
+    stop_if_payment_succeeds: bool = True
+
+
+class PolicyUpdateRequest(BaseModel):
+    max_discount_percent: int | None = None
+    max_automated_amount_paise: int | None = None
+    max_contacts_count: int | None = None
+    max_contacts_window_days: int | None = None
+    require_human_approval_above_paise: int | None = None
+    allowed_channels: list[str] | None = None
+    stop_if_payment_succeeds: bool | None = None
+
+
+class ActionRequest(BaseModel):
+    strategy: str
+    discount_rate: float | None = None
+
+
+class ActionResult(BaseModel):
+    ok: bool
+    error: str | None = None
+    executed: bool = False
+    status: str | None = None
+    policy: str | None = None
+    reason: str | None = None
+    recovered: bool = False
+    recovered_paise: int = 0
+    cost_paise: int = 0
+

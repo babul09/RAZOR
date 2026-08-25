@@ -5,6 +5,7 @@ import {
   mockCases,
   mockStrategies,
   mockCaseDetail,
+  mockPolicy,
 } from "./mock";
 
 export const API_URL =
@@ -141,6 +142,39 @@ export interface RazorpayRecover {
   link_status: string | null;
 }
 
+export interface Policy {
+  merchant_id: string;
+  max_discount_percent: number;
+  max_automated_amount_paise: number;
+  max_contacts_count: number;
+  max_contacts_window_days: number;
+  require_human_approval_above_paise: number;
+  allowed_channels: string[];
+  stop_if_payment_succeeds: boolean;
+}
+
+export interface ActionResult {
+  ok: boolean;
+  error: string | null;
+  executed: boolean;
+  status: string | null;
+  policy: string | null;
+  reason: string | null;
+  recovered: boolean;
+  recovered_paise: number;
+  cost_paise: number;
+}
+
+export const CHOOSABLE_STRATEGIES = [
+  "RETRY",
+  "PAYMENT_METHOD_SWITCH",
+  "WHATSAPP_REMINDER",
+  "EMAIL_REMINDER",
+  "PAYMENT_LINK",
+  "DISCOUNT_OFFER",
+  "HUMAN_ESCALATION",
+];
+
 async function getJson<T>(path: string, fallback: T): Promise<T> {
   try {
     const res = await fetch(`${API_URL}${path}`, { cache: "no-store" });
@@ -153,6 +187,47 @@ async function getJson<T>(path: string, fallback: T): Promise<T> {
 
 export function getOverview(): Promise<Overview> {
   return getJson("/api/analytics/overview", mockOverview);
+}
+
+// --- Operator console ---
+
+export function getPolicy(): Promise<Policy> {
+  return getJson("/api/policy", mockPolicy);
+}
+
+async function writeJson<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let msg = "request failed";
+    try {
+      const e = await res.json();
+      msg = e.detail?.message || e.detail || msg;
+    } catch {
+      /* keep default */
+    }
+    throw new Error(String(msg));
+  }
+  return (await res.json()) as T;
+}
+
+export function updatePolicy(patch: Partial<Policy>): Promise<Policy> {
+  return writeJson<Policy>("PUT", "/api/policy", patch);
+}
+
+export function takeAction(caseId: string, strategy: string): Promise<ActionResult> {
+  return writeJson<ActionResult>("POST", `/api/recovery/cases/${caseId}/action`, { strategy });
+}
+
+export function approveCase(caseId: string): Promise<ActionResult> {
+  return writeJson<ActionResult>("POST", `/api/recovery/cases/${caseId}/approve`);
+}
+
+export function rejectCase(caseId: string): Promise<ActionResult> {
+  return writeJson<ActionResult>("POST", `/api/recovery/cases/${caseId}/reject`);
 }
 
 /** Run a recovery batch over revenue-at-risk cases, returning measured money. */

@@ -1,6 +1,17 @@
 /** Mock fallback data (used when the backend is unreachable). */
 
-import type { CaseDetail, CaseSummary, Overview, StrategyMetric } from "./api";
+import type { CaseDetail, CaseSummary, Overview, Policy, StrategyMetric } from "./api";
+
+export const mockPolicy: Policy = {
+  merchant_id: "merchant_001",
+  max_discount_percent: 10,
+  max_automated_amount_paise: 500000,
+  max_contacts_count: 3,
+  max_contacts_window_days: 7,
+  require_human_approval_above_paise: 500000,
+  allowed_channels: ["whatsapp", "email"],
+  stop_if_payment_succeeds: true,
+};
 
 export const mockOverview: Overview = {
   revenue_at_risk_paise: 48200000,

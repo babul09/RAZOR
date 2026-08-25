@@ -19,6 +19,7 @@ from typing import Callable
 
 from db.database import SessionLocal
 from db.models import (
+    AgentDecision,
     Customer,
     CustomerRecoveryProfile,
     Payment,
@@ -71,6 +72,13 @@ class RecoveryBatchResult:
     cost_paise: int = 0
     incremental_paise: int = 0
     per_source: list[BatchSourceMetric] = field(default_factory=list)
+
+
+class _ManualDecision:
+    """Minimal decision view for policy checks on operator-chosen actions."""
+
+    def __init__(self, strategy: str):
+        self.selected_strategy = strategy
 
 
 class RecoveryBatchExecutor:
@@ -352,6 +360,99 @@ class RecoveryBatchExecutor:
         if recovered > 0:
             report.recoveries += 1
             metric.recoveries += 1
+
+    # ------------------------------------------------------------------
+    # Operator-in-the-loop (manual action / approvals)
+    # ------------------------------------------------------------------
+
+    def execute_manual(
+        self,
+        case_id: str,
+        strategy: str,
+        discount_rate: float = 0.0,
+    ) -> dict:
+        """Run an operator-chosen action for a case: policy check, then execute.
+
+        Policy stays a hard gate — a blocked action routes to human review
+        instead of executing. Returns a plain dict for the API.
+        """
+        from db.models import AuditLog
+
+        with self.session_factory() as session:
+            self.decision_engine.session = session
+            case = session.get(RecoveryCase, case_id)
+            if case is None:
+                return {"ok": False, "error": "case not found"}
+
+            customer = session.get(Customer, case.customer_id) if case.customer_id else None
+            profile = (
+                session.query(CustomerRecoveryProfile)
+                .filter_by(customer_id=case.customer_id)
+                .first()
+            )
+
+            decision = _ManualDecision(strategy)
+            policy = self.policy_engine.check(
+                decision, case.amount_at_risk_paise, discount_rate=discount_rate
+            )
+            # Always record the operator's chosen action so it can be approved.
+            session.add(
+                AgentDecision(
+                    case_id=case.id,
+                    selected_strategy=strategy,
+                    reasoning=f"Operator selected {strategy}",
+                    policy_check_passed=policy.passed,
+                )
+            )
+            if not policy.passed:
+                session.add(
+                    AuditLog(
+                        case_id=case.id,
+                        event_type="POLICY",
+                        details_json={"status": policy.status, "reason": policy.reason},
+                    )
+                )
+                case.status = RecoveryCaseStatus.AWAITING_APPROVAL.value
+                session.commit()
+                return {
+                    "ok": True,
+                    "executed": False,
+                    "status": case.status,
+                    "policy": policy.status,
+                    "reason": policy.reason,
+                }
+
+            outcome = self._execute_case(session, case, customer, profile, strategy)
+            result_status = case.status
+            session.commit()
+            return {
+                "ok": True,
+                "executed": True,
+                "status": result_status,
+                "policy": "PASS",
+                "recovered": outcome.revenue_recovered_paise > 0,
+                "recovered_paise": outcome.revenue_recovered_paise,
+                "cost_paise": outcome.cost_of_recovery_paise,
+            }
+
+    def reject_case(self, case_id: str) -> dict:
+        """Operator rejects a pending case — route it to STOPPED."""
+        from db.models import AuditLog
+
+        with self.session_factory() as session:
+            case = session.get(RecoveryCase, case_id)
+            if case is None:
+                return {"ok": False, "error": "case not found"}
+            session.add(
+                AuditLog(
+                    case_id=case.id,
+                    event_type="POLICY",
+                    details_json={"status": "REJECTED", "reason": "Rejected by operator"},
+                )
+            )
+            case.status = RecoveryCaseStatus.STOPPED.value
+            session.commit()
+            return {"ok": True, "status": case.status}
 
     @staticmethod
     def _audit_policy(session, case: RecoveryCase, policy_result) -> None:

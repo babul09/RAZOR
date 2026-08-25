@@ -118,9 +118,12 @@ stop_one() {
   p="$(read_pid "$name")"
   if is_running "$name"; then
     log "stopping $name (pid $p)"
+    # Kill descendants first (Celery pool workers, next-server children) so
+    # forked children don't outlive their parent.
+    pkill -TERM -P "$p" 2>/dev/null || true
     kill "$p" 2>/dev/null || true
-    # Give it a moment, then force.
     for _ in 1 2 3; do is_running "$name" || break; sleep 1; done
+    pkill -KILL -P "$p" 2>/dev/null || true
     is_running "$name" && kill -9 "$p" 2>/dev/null || true
   fi
   rm -f "$(pidfile "$name")"
