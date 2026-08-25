@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from api.schemas import AnalyticsOverview, StrategyMetric
+from api.schemas import AnalyticsOverview, OverviewSourceMetric, StrategyMetric
 from config import settings
 from db.database import get_db
 from db.models import RecoveryAction, RecoveryCase, RecoveryCaseStatus, RecoveryOutcome
@@ -76,6 +76,25 @@ def overview(db: Session = Depends(get_db)) -> AnalyticsOverview:
         int(recovered) - baseline_paise if executed_at_risk > 0 else None
     )
     recovery_rate = recovered / at_risk if at_risk else 0.0
+    source_rows = (
+        db.query(
+            RecoveryCase.source_type,
+            func.coalesce(func.sum(RecoveryCase.amount_at_risk_paise), 0),
+            func.coalesce(func.sum(RecoveryOutcome.revenue_recovered_paise), 0),
+        )
+        .join(RecoveryOutcome, RecoveryOutcome.case_id == RecoveryCase.id)
+        .group_by(RecoveryCase.source_type)
+        .all()
+    )
+    by_source = [
+        OverviewSourceMetric(
+            source_type=stype or "payment",
+            at_risk_paise=int(at_risk_src),
+            recovered_paise=int(recovered_src),
+        )
+        for stype, at_risk_src, recovered_src in source_rows
+    ]
+    by_source.sort(key=lambda m: m.recovered_paise, reverse=True)
     data = {
         "revenue_at_risk_paise": int(at_risk),
         "recovered_paise": int(recovered),
@@ -84,6 +103,7 @@ def overview(db: Session = Depends(get_db)) -> AnalyticsOverview:
         "recovered_cases": int(recovered_cases),
         "executed_at_risk_paise": int(executed_at_risk),
         "incremental_paise": incremental,
+        "by_source": [m.model_dump() for m in by_source],
     }
     _cache_set(OVERVIEW_KEY, data)
     return AnalyticsOverview(**data)

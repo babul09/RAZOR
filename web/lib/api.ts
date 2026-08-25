@@ -32,6 +32,12 @@ export interface CaseDetail extends CaseSummary {
   timeline: TimelineEntry[];
 }
 
+export interface OverviewSourceMetric {
+  source_type: string;
+  at_risk_paise: number;
+  recovered_paise: number;
+}
+
 export interface Overview {
   revenue_at_risk_paise: number;
   recovered_paise: number;
@@ -40,6 +46,7 @@ export interface Overview {
   recovered_cases: number;
   executed_at_risk_paise: number;
   incremental_paise: number | null;
+  by_source: OverviewSourceMetric[];
 }
 
 export interface BatchSourceMetric {

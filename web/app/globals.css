@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
-  background: #070b14;
-  color: #e8edf6;
+  background: #f4f6f8;
+  color: #101828;
 }
 
 body {
@@ -24,18 +24,18 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid #e8b84b;
+  outline: 2px solid #b45309;
   outline-offset: 2px;
 }
 
 ::selection {
-  background: rgb(232 184 75 / 0.25);
+  background: rgb(180 83 9 / 0.16);
 }
 
 /* Subtle scrollbar for the ops console. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1e2a47 transparent;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

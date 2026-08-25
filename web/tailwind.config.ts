@@ -5,33 +5,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        paper: "#F4F6F8",
         ink: {
-          950: "#070B14",
-          900: "#0C1220",
-          800: "#131C30",
-          700: "#1A2540",
+          950: "#0F172A", // ink text + dark text on gold buttons
+          900: "#FFFFFF", // card surface
+          800: "#F1F5F9", // subtle surface / header bg
+          700: "#E7ECF3", // chip bg / hover
         },
-        line: "#1E2A47",
+        console: "#0B1120", // signature dark recovery readout panel
+        line: "#E3E8EF",
         gold: {
-          DEFAULT: "#E8B84B",
-          dim: "#B98A2A",
+          DEFAULT: "#B45309",
+          dim: "#92400E",
         },
         mint: {
-          DEFAULT: "#3DDC97",
-          dim: "#2AA678",
+          DEFAULT: "#0E9F6E",
+          dim: "#0B7A55",
         },
         rose: {
-          DEFAULT: "#F4707B",
-          dim: "#C24A57",
+          DEFAULT: "#D92D20",
+          dim: "#B42318",
         },
         rpay: {
           blue: "#4E7CFF",
-          light: "#6E9BFF",
+          light: "#2F5FE0",
           navy: "#0A2540",
         },
         fg: {
-          DEFAULT: "#E8EDF6",
-          muted: "#8B96AE",
+          DEFAULT: "#101828",
+          muted: "#5B6B7A",
         },
       },
       fontFamily: {
@@ -43,7 +45,7 @@ const config: Config = {
         card: "0.625rem",
       },
       boxShadow: {
-        card: "0 1px 0 0 rgb(232 184 75 / 0.06), 0 8px 24px -12px rgb(0 0 0 / 0.6)",
+        card: "0 1px 2px rgb(16 24 40 / 0.04), 0 12px 28px -18px rgb(16 24 40 / 0.16)",
       },
       fontSize: {
         hero: ["3.5rem", { lineHeight: "1", fontWeight: "600" }],

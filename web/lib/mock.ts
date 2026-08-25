@@ -10,6 +10,12 @@ export const mockOverview: Overview = {
   recovered_cases: 5720,
   executed_at_risk_paise: 48200000,
   incremental_paise: 72200000,
+  by_source: [
+    { source_type: "payment", at_risk_paise: 24000000, recovered_paise: 8200000 },
+    { source_type: "checkout", at_risk_paise: 9000000, recovered_paise: 3100000 },
+    { source_type: "subscription", at_risk_paise: 9000000, recovered_paise: 1800000 },
+    { source_type: "invoice", at_risk_paise: 6200000, recovered_paise: 700000 },
+  ],
 };
 
 export const mockCases: CaseSummary[] = [

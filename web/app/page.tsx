@@ -10,6 +10,7 @@ import OverviewSection from "@/components/OverviewSection";
 import RazorpaySection from "@/components/RazorpaySection";
 import RecoveryQueueSection from "@/components/RecoveryQueueSection";
 import SimulationSection from "@/components/SimulationSection";
+import StatusStrip from "@/components/StatusStrip";
 import StrategyPerformanceSection from "@/components/StrategyPerformanceSection";
 
 type Tab =
@@ -33,27 +34,39 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "simulation", label: "Simulation", icon: "▶" },
 ];
 
+const TITLES: Record<Tab, { title: string; sub: string }> = {
+  how: { title: "How it works", sub: "What RAZOR does and why it works" },
+  overview: { title: "Overview", sub: "Measured recovery across every event type" },
+  architecture: { title: "Live architecture", sub: "The recovery pipeline in real time" },
+  queue: { title: "Recovery queue", sub: "Every revenue-at-risk case, prioritized" },
+  razorpay: { title: "Razorpay live", sub: "Real failed payments · side-by-side recovery" },
+  activity: { title: "Agent activity", sub: "Decision timeline and reasoning per case" },
+  strategies: { title: "Strategy", sub: "What recovers money and what it costs" },
+  simulation: { title: "Simulation", sub: "Project recovery across a synthetic batch" },
+};
+
 export default function Home() {
   const [tab, setTab] = useState<Tab>("how");
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
+  const meta = TITLES[tab];
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Ops rail */}
-      <aside className="shrink-0 border-b border-line bg-ink-900/60 md:w-56 md:border-b-0 md:border-r">
-        <div className="flex items-center gap-2 px-5 py-4">
-          <span className="grid h-8 w-8 place-items-center rounded-card bg-gold/15 font-display text-sm font-bold text-gold">
+      <aside className="shrink-0 border-b border-line bg-ink-900/80 md:w-60 md:border-b-0 md:border-r">
+        <div className="flex items-center gap-3 px-5 py-4">
+          <span className="grid h-9 w-9 place-items-center rounded-card bg-gold/15 font-display text-base font-bold text-gold">
             R
           </span>
           <div className="leading-tight">
             <p className="font-display text-sm font-bold tracking-wide text-fg">RAZOR</p>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fg-muted">
-              recovery terminal
+              revenue recovery
             </p>
           </div>
         </div>
 
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 md:flex-col md:pb-0">
+        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 md:flex-col md:pb-4">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -61,14 +74,17 @@ export default function Home() {
               aria-current={tab === t.id ? "page" : undefined}
               className={`flex shrink-0 items-center gap-2.5 rounded-card px-3 py-2 text-sm transition-colors md:w-full ${
                 tab === t.id
-                  ? "bg-ink-700 text-gold"
-                  : "text-fg-muted hover:bg-ink-800 hover:text-fg"
+                  ? "bg-ink-700 text-fg"
+                  : "text-fg-muted hover:bg-ink-700/60 hover:text-fg"
               }`}
             >
               <span className="w-4 text-center font-mono text-xs" aria-hidden>
                 {t.icon}
               </span>
               <span className="whitespace-nowrap">{t.label}</span>
+              {tab === t.id && (
+                <span className="ml-auto hidden h-1.5 w-1.5 rounded-full bg-gold md:block" />
+              )}
             </button>
           ))}
         </nav>
@@ -76,7 +92,19 @@ export default function Home() {
 
       {/* Content */}
       <main className="min-w-0 flex-1 p-4 md:p-6">
-        <div>
+        <div className="mx-auto max-w-6xl space-y-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <h1 className="font-display text-xl font-bold text-fg">{meta.title}</h1>
+              <p className="font-mono text-xs text-fg-muted">{meta.sub}</p>
+            </div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-fg-muted">
+              RAZOR · recovery terminal
+            </p>
+          </div>
+
+          <StatusStrip />
+
           {tab === "how" && <HowItWorksSection />}
           {tab === "overview" && <OverviewSection />}
           {tab === "architecture" && <ArchitectureSection />}

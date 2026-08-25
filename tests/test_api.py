@@ -124,6 +124,7 @@ def test_analytics_overview_cached(_client):
         "recovered_cases": 1,
         "executed_at_risk_paise": 0,
         "incremental_paise": None,
+        "by_source": [],
     }
     _cache.setex(OVERVIEW_KEY, 30, __import__("json").dumps(known))
     try:

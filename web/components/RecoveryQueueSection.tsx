@@ -8,9 +8,9 @@ import { Empty, Loading } from "./State";
 const statusStyles: Record<string, string> = {
   NEW: "bg-ink-700 text-fg-muted",
   STRATEGY_SELECTED: "bg-gold/15 text-gold",
-  WAIT: "bg-amber-500/15 text-amber-300",
+  WAIT: "bg-amber-500/15 text-amber-700",
   STOPPED: "bg-ink-700 text-fg-muted",
-  AWAITING_APPROVAL: "bg-orange-500/15 text-orange-300",
+  AWAITING_APPROVAL: "bg-orange-500/15 text-orange-700",
   RECOVERED: "bg-mint/15 text-mint",
   FAILED: "bg-rose/15 text-rose",
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 import { getCases, type CaseSummary } from "@/lib/api";
 import { Empty, Loading } from "./State";
@@ -109,6 +109,38 @@ export default function ArchitectureSection() {
         <p className="font-mono text-[11px] text-fg-muted/70">
           {totalLive} cases in pipeline · refreshes live
         </p>
+      </div>
+
+      {/* Flow stepper */}
+      <div className="flex flex-wrap items-center gap-y-2 rounded-card border border-line bg-ink-900 p-3 shadow-card">
+        {counts.map(({ stage, count }, i) => (
+          <Fragment key={stage.key}>
+            {i > 0 && (
+              <span className="px-1.5 font-mono text-fg-muted/50" aria-hidden>
+                →
+              </span>
+            )}
+            <div className="flex items-center gap-2">
+              <span
+                className={`h-2 w-2 rounded-full ${count > 0 ? "bg-gold" : "bg-ink-700"}`}
+              />
+              <span
+                className={`font-mono text-[11px] uppercase tracking-wider ${
+                  count > 0 ? "text-fg" : "text-fg-muted"
+                }`}
+              >
+                {stage.title}
+              </span>
+              <span
+                className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] ${
+                  count > 0 ? "bg-gold/15 text-gold" : "bg-ink-700 text-fg-muted"
+                }`}
+              >
+                {count}
+              </span>
+            </div>
+          </Fragment>
+        ))}
       </div>
 
       {/* Pipeline rails */}

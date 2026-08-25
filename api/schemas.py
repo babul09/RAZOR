@@ -43,6 +43,12 @@ class PaginatedCases(BaseModel):
     page_size: int
 
 
+class OverviewSourceMetric(BaseModel):
+    source_type: str
+    at_risk_paise: int = 0
+    recovered_paise: int = 0
+
+
 class AnalyticsOverview(BaseModel):
     revenue_at_risk_paise: int
     recovered_paise: int
@@ -55,6 +61,8 @@ class AnalyticsOverview(BaseModel):
     # Measured money: incremental vs a baseline over the EXECUTED batch. None
     # when no recovery outcome has been executed yet (honest no-data state).
     incremental_paise: int | None = None
+    # Per revenue-risk source type breakdown (executed outcomes).
+    by_source: list[OverviewSourceMetric] = []
 
 
 class BatchSourceMetric(BaseModel):
